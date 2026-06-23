@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Award, Clock, Compass, MessageCircle, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Award, Clock, Compass, Home, MessageCircle, ShieldCheck, Star } from "lucide-react";
 import {
   allBlogPostsQuery,
   allReviewsQuery,
