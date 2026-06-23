@@ -15,7 +15,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Sign in — Bright Edge Agency" },
+      { title: "Sign in | Bright Edge Agency" },
       { name: "description", content: "Bright Edge staff sign-in." },
       { name: "robots", content: "noindex,nofollow" },
     ],
@@ -58,7 +58,7 @@ function AuthPage() {
           <Logo className="text-white" />
           <div>
             <p className="font-display text-4xl font-semibold leading-tight">A workspace for the team that closes deals.</p>
-            <p className="mt-3 max-w-md text-white/80">Listings, leads, reviews, and reports — all in one place.</p>
+            <p className="mt-3 max-w-md text-white/80">Listings, leads, reviews, and reports, all in one place.</p>
           </div>
         </div>
       </div>
@@ -67,7 +67,7 @@ function AuthPage() {
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground">← Back to site</Link>
           <div>
             <h1 className="font-display text-3xl font-semibold tracking-tight">Sign in</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Staff access only — new accounts are created by your administrator.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Staff access only, new accounts are created by your administrator.</p>
           </div>
 
           <Button onClick={signInGoogle} disabled={busy} variant="outline" className="w-full">

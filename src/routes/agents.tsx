@@ -6,9 +6,9 @@ import { allAgentsQuery } from "@/lib/queries";
 export const Route = createFileRoute("/agents")({
   head: () => ({
     meta: [
-      { title: "Our Agents — Bright Edge Agency" },
-      { name: "description", content: "Meet the people behind Bright Edge — luxury sales, executive rentals, investment, and coastal specialists." },
-      { property: "og:title", content: "Our Agents — Bright Edge Agency" },
+      { title: "Our Agents | Bright Edge Agency" },
+      { name: "description", content: "Meet the people behind Bright Edge, luxury sales, executive rentals, investment, and coastal specialists." },
+      { property: "og:title", content: "Our Agents | Bright Edge Agency" },
       { property: "og:url", content: "/agents" },
     ],
     links: [{ rel: "canonical", href: "/agents" }],

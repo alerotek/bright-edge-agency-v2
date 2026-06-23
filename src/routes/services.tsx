@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Building2, Compass, FileSearch, Home, KeyRound, LineChart } from "lucide-react";
 
 const SERVICES = [
-  { icon: Home, title: "Residential sales", body: "Family homes, apartments, and townhouses across Nairobi and the coast — from listing to exchange." },
+  { icon: Home, title: "Residential sales", body: "Family homes, apartments, and townhouses across Nairobi and the coast, from listing to exchange." },
   { icon: Building2, title: "Luxury sales", body: "Discreet representation for premium villas, penthouses, and waterfront homes." },
   { icon: KeyRound, title: "Executive rentals", body: "Furnished, corporate-grade rental inventory for relocations and short-term needs." },
   { icon: LineChart, title: "Investment advisory", body: "Yield modelling, off-plan due diligence, and portfolio structuring for serious investors." },
@@ -13,9 +13,9 @@ const SERVICES = [
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Services — Bright Edge Agency" },
+      { title: "Services | Bright Edge Agency" },
       { name: "description", content: "Residential and luxury sales, executive rentals, investment advisory, due diligence, and property management across Kenya." },
-      { property: "og:title", content: "Services — Bright Edge Agency" },
+      { property: "og:title", content: "Services | Bright Edge Agency" },
       { property: "og:url", content: "/services" },
     ],
     links: [{ rel: "canonical", href: "/services" }],

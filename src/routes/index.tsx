@@ -18,9 +18,9 @@ import { buildWhatsappLink, formatDate } from "@/lib/format";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Bright Edge Agency — Premium Real Estate in Kenya" },
+      { title: "Bright Edge Agency | Premium Real Estate in Kenya" },
       { name: "description", content: "Curated luxury and residential properties for sale and rent across Nairobi and the Kenyan coast. Transparent advisory, professional management." },
-      { property: "og:title", content: "Bright Edge Agency — Premium Real Estate in Kenya" },
+      { property: "og:title", content: "Bright Edge Agency | Premium Real Estate in Kenya" },
       { property: "og:description", content: "Curated luxury and residential properties for sale and rent across Kenya." },
       { property: "og:url", content: "/" },
     ],
@@ -119,7 +119,7 @@ function HomePage() {
         <SectionHeading
           eyebrow="Featured"
           title="Hand-picked properties"
-          description="A rotating selection of the best on our books right now — from coastal villas to executive city rentals."
+          description="A rotating selection of the best on our books right now, from coastal villas to executive city rentals."
           action={
             <Button asChild variant="outline">
               <Link to="/properties">View all properties <ArrowRight className="ml-2 h-4 w-4" /></Link>
@@ -145,7 +145,7 @@ function HomePage() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[
               { icon: ShieldCheck, title: "Verified inventory", body: "Every listing on the site has been walked, photographed, and pricing-checked by an agent." },
-              { icon: Compass, title: "Local knowledge", body: "Suburb-by-suburb expertise from Diani to Runda — we know the streets and the schools." },
+              { icon: Compass, title: "Local knowledge", body: "Suburb-by-suburb expertise from Diani to Runda, we know the streets and the schools." },
               { icon: Award, title: "Closing track record", body: "Average days-on-market is 61, below the city benchmark of 92." },
               { icon: Clock, title: "Fast response", body: "Inquiries answered within four working hours, every working day of the year." },
             ].map(({ icon: Icon, title, body }) => (
@@ -166,7 +166,7 @@ function HomePage() {
         <SectionHeading
           eyebrow="Authority"
           title="Practical real estate knowledge, written by people who close deals"
-          description="Independent reviews, quarterly market reads, and investment guides — no fluff, no recycled press releases."
+          description="Independent reviews, quarterly market reads, and investment guides, no fluff, no recycled press releases."
         />
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">

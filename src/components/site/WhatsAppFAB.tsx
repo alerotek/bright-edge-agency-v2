@@ -8,7 +8,7 @@ export function WhatsAppFAB() {
   if (!s?.company_whatsapp) return null;
   const href = buildWhatsappLink(
     s.company_whatsapp,
-    `Hello ${s.company_name ?? "Bright Edge"} — I'd like more information.`,
+    `Hello ${s.company_name ?? "Bright Edge"}, I'd like more information.`,
   );
   return (
     <a

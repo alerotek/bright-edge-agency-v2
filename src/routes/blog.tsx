@@ -6,9 +6,9 @@ import { formatDate } from "@/lib/format";
 export const Route = createFileRoute("/blog")({
   head: () => ({
     meta: [
-      { title: "Insights — Bright Edge Agency" },
+      { title: "Insights | Bright Edge Agency" },
       { name: "description", content: "Market insights, investment guides, and neighbourhood reads from Bright Edge Agency." },
-      { property: "og:title", content: "Insights — Bright Edge Agency" },
+      { property: "og:title", content: "Insights | Bright Edge Agency" },
       { property: "og:url", content: "/blog" },
     ],
     links: [{ rel: "canonical", href: "/blog" }],

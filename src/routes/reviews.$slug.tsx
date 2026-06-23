@@ -15,7 +15,7 @@ export const Route = createFileRoute("/reviews/$slug")({
     if (!r) return {};
     return {
       meta: [
-        { title: r.meta_title ?? `${r.title} — Bright Edge Reviews` },
+        { title: r.meta_title ?? `${r.title} | Bright Edge Reviews` },
         { name: "description", content: r.meta_description ?? r.excerpt ?? "" },
         { property: "og:title", content: r.meta_title ?? r.title },
         { property: "og:description", content: r.meta_description ?? r.excerpt ?? "" },

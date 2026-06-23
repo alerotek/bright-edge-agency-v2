@@ -13,7 +13,7 @@ export const Route = createFileRoute("/blog/$slug")({
     if (!p) return {};
     return {
       meta: [
-        { title: p.meta_title ?? `${p.title} — Bright Edge` },
+        { title: p.meta_title ?? `${p.title}, Bright Edge` },
         { name: "description", content: p.meta_description ?? p.excerpt ?? "" },
         { property: "og:title", content: p.meta_title ?? p.title },
         { property: "og:description", content: p.meta_description ?? p.excerpt ?? "" },
