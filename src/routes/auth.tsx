@@ -30,7 +30,9 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const finishLogin = () => navigate({ to: redirect ?? "/admin", replace: true });
+  const safeRedirect =
+    redirect && redirect.startsWith("/") && !redirect.startsWith("//") ? redirect : "/admin";
+  const finishLogin = () => navigate({ to: safeRedirect, replace: true });
 
   const signInGoogle = async () => {
     setBusy(true);

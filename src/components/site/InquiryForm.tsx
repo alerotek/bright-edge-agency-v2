@@ -44,7 +44,10 @@ export function InquiryForm({
       source: source as any,
     });
     if (error) {
-      toast.error("We couldn't send your message", { description: error.message });
+      console.error("[InquiryForm] insert error:", error);
+      toast.error("We couldn't send your message", {
+        description: "Please try again or contact us directly.",
+      });
       return;
     }
     setSubmitted(true);
