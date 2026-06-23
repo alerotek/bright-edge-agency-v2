@@ -55,10 +55,10 @@ function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative isolate overflow-hidden">
+      <section className="relative isolate overflow-hidden bg-slate-900">
         <div
           aria-hidden
-          className="absolute inset-0 -z-10"
+          className="absolute inset-0 -z-10 opacity-70"
           style={{ background: "var(--gradient-hero)" }}
         />
         <div
