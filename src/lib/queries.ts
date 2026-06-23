@@ -144,7 +144,7 @@ export const allBlogPostsQuery = queryOptions({
     const { data, error } = await supabase
       .from("blog_posts")
       .select(`
-        id, title, slug, excerpt, featured_image, reading_minutes, featured, published_at,
+        id, title, slug, excerpt, featured_image, gallery_images, reading_minutes, featured, published_at,
         category:blog_categories(id,name,slug)
       `)
       .eq("status", "published")
