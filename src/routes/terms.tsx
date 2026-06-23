@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Use — Bright Edge Agency" },
+      { title: "Terms of Use | Bright Edge Agency" },
       { name: "description", content: "Terms governing your use of the Bright Edge Agency website." },
       { property: "og:url", content: "/terms" },
     ],

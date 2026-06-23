@@ -15,7 +15,7 @@ export const Route = createFileRoute("/reviews/$slug")({
     if (!r) return {};
     return {
       meta: [
-        { title: r.meta_title ?? `${r.title} — Bright Edge Reviews` },
+        { title: r.meta_title ?? `${r.title} | Bright Edge Reviews` },
         { name: "description", content: r.meta_description ?? r.excerpt ?? "" },
         { property: "og:title", content: r.meta_title ?? r.title },
         { property: "og:description", content: r.meta_description ?? r.excerpt ?? "" },
@@ -44,6 +44,9 @@ export const Route = createFileRoute("/reviews/$slug")({
 
 function ReviewDetail() {
   const r: any = Route.useLoaderData();
+  const gallery: string[] = Array.isArray(r.gallery_images) ? r.gallery_images : [];
+  const paragraphs = (r.content ?? "").split(/\n+/).filter((x: string) => x.trim().length);
+  const mid = Math.max(1, Math.floor(paragraphs.length / 2));
   return (
     <article className="mx-auto max-w-3xl px-4 py-14 sm:px-6 lg:px-8">
       <Link to="/reviews" className="text-sm text-muted-foreground hover:text-foreground">← All reviews</Link>
@@ -61,8 +64,24 @@ function ReviewDetail() {
         <img src={r.featured_image} alt={r.title} className="mt-6 aspect-[16/10] w-full rounded-2xl object-cover" />
       )}
       <div className="prose prose-slate mt-8 max-w-none leading-relaxed text-foreground/85">
-        {(r.content ?? "").split(/\n+/).map((p: string, i: number) => <p key={i}>{p}</p>)}
+        {paragraphs.slice(0, mid).map((para: string, i: number) => <p key={`a${i}`}>{para}</p>)}
+        {gallery[0] && (
+          <figure className="my-8 not-prose">
+            <img src={gallery[0]} alt={`${r.title} – figure 1`} className="aspect-[16/9] w-full rounded-2xl object-cover" />
+          </figure>
+        )}
+        {paragraphs.slice(mid).map((para: string, i: number) => <p key={`b${i}`}>{para}</p>)}
       </div>
+      {gallery.length >= 2 && (
+        <section className="mt-10">
+          <h2 className="font-display text-xl font-semibold tracking-tight">More from this visit</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            {gallery.slice(1).map((src, i) => (
+              <img key={i} src={src} alt={`${r.title} gallery ${i + 2}`} loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />
+            ))}
+          </div>
+        </section>
+      )}
       {r.property ? (
         <div className="mt-12 rounded-2xl border border-border bg-card p-6">
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">Reviewed property</p>

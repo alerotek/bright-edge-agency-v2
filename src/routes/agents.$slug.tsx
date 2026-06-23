@@ -17,9 +17,9 @@ export const Route = createFileRoute("/agents/$slug")({
     const a = d.agent;
     return {
       meta: [
-        { title: `${a.full_name} — ${a.position} | Bright Edge Agency` },
+        { title: `${a.full_name} | ${a.position} | Bright Edge Agency` },
         { name: "description", content: a.bio?.slice(0, 160) ?? "" },
-        { property: "og:title", content: `${a.full_name} — Bright Edge Agency` },
+        { property: "og:title", content: `${a.full_name} | Bright Edge Agency` },
         { property: "og:description", content: a.bio?.slice(0, 160) ?? "" },
         { property: "og:image", content: a.photo ?? "" },
         { property: "og:type", content: "profile" },
@@ -72,7 +72,7 @@ function AgentDetail() {
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         <h2 className="font-display text-2xl font-semibold">Current listings ({properties.length})</h2>
         {properties.length === 0 ? (
-          <p className="mt-4 text-muted-foreground">No active listings — get in touch to discuss upcoming inventory.</p>
+          <p className="mt-4 text-muted-foreground">No active listings, get in touch to discuss upcoming inventory.</p>
         ) : (
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {properties.map((p: any) => <PropertyCard key={p.id} property={p} />)}

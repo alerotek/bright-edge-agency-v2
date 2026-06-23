@@ -19,7 +19,7 @@ export const Route = createFileRoute("/property/$slug")({
     if (!p) return {};
     return {
       meta: [
-        { title: p.meta_title ?? `${p.title} — Bright Edge Agency` },
+        { title: p.meta_title ?? `${p.title} | Bright Edge Agency` },
         { name: "description", content: p.meta_description ?? p.excerpt ?? p.description?.slice(0, 160) ?? "" },
         { property: "og:title", content: p.meta_title ?? p.title },
         { property: "og:description", content: p.meta_description ?? p.excerpt ?? "" },
@@ -129,10 +129,10 @@ function PropertyDetail() {
 
           <div className="grid grid-cols-2 gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-4">
             {[
-              { icon: BedDouble, label: "Bedrooms", v: p.bedrooms ?? "—" },
-              { icon: Bath, label: "Bathrooms", v: p.bathrooms ?? "—" },
-              { icon: Maximize, label: "Area", v: p.area_sqft ? `${Math.round(p.area_sqft).toLocaleString()} sqft` : "—" },
-              { icon: Car, label: "Parking", v: p.parking ?? "—" },
+              { icon: BedDouble, label: "Bedrooms", v: p.bedrooms ?? "N/A" },
+              { icon: Bath, label: "Bathrooms", v: p.bathrooms ?? "N/A" },
+              { icon: Maximize, label: "Area", v: p.area_sqft ? `${Math.round(p.area_sqft).toLocaleString()} sqft` : "N/A" },
+              { icon: Car, label: "Parking", v: p.parking ?? "N/A" },
             ].map(({ icon: Icon, label, v }) => (
               <div key={label} className="flex items-center gap-3 rounded-xl bg-secondary/60 p-3">
                 <Icon className="h-5 w-5 text-primary" />

@@ -11,9 +11,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/properties")({
   head: () => ({
     meta: [
-      { title: "Properties — Bright Edge Agency" },
+      { title: "Properties | Bright Edge Agency" },
       { name: "description", content: "Browse premium properties for sale and rent across Nairobi and the Kenyan coast." },
-      { property: "og:title", content: "Properties — Bright Edge Agency" },
+      { property: "og:title", content: "Properties | Bright Edge Agency" },
       { property: "og:url", content: "/properties" },
     ],
     links: [{ rel: "canonical", href: "/properties" }],

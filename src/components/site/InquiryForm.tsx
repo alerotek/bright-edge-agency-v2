@@ -44,18 +44,21 @@ export function InquiryForm({
       source: source as any,
     });
     if (error) {
-      toast.error("We couldn't send your message", { description: error.message });
+      console.error("[InquiryForm] insert error:", error);
+      toast.error("We couldn't send your message", {
+        description: "Please try again or contact us directly.",
+      });
       return;
     }
     setSubmitted(true);
-    toast.success("Inquiry sent — we'll be in touch shortly.");
+    toast.success("Inquiry sent, we'll be in touch shortly.");
     form.reset();
   };
 
   if (submitted) {
     return (
       <div className="rounded-xl border border-accent/40 bg-accent/10 p-5 text-sm">
-        <p className="font-semibold text-foreground">Thank you — your inquiry is in.</p>
+        <p className="font-semibold text-foreground">Thank you, your inquiry is in.</p>
         <p className="mt-1 text-muted-foreground">An agent will respond within four working hours, usually sooner.</p>
         <Button variant="ghost" className="mt-3 -ml-2" onClick={() => setSubmitted(false)}>Send another</Button>
       </div>

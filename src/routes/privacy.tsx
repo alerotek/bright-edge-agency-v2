@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Bright Edge Agency" },
+      { title: "Privacy Policy | Bright Edge Agency" },
       { name: "description", content: "How Bright Edge Agency collects, uses, and protects your personal information." },
       { property: "og:url", content: "/privacy" },
     ],

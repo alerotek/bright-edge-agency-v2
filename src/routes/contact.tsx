@@ -9,9 +9,9 @@ import { buildWhatsappLink } from "@/lib/format";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Bright Edge Agency" },
+      { title: "Contact | Bright Edge Agency" },
       { name: "description", content: "Get in touch with Bright Edge Agency in Nairobi. Phone, email, WhatsApp, and visit-us details." },
-      { property: "og:title", content: "Contact — Bright Edge Agency" },
+      { property: "og:title", content: "Contact | Bright Edge Agency" },
       { property: "og:url", content: "/contact" },
     ],
     links: [{ rel: "canonical", href: "/contact" }],
@@ -45,7 +45,7 @@ function ContactPage() {
         {s?.company_whatsapp ? (
           <div className="rounded-2xl bg-accent/15 p-6">
             <h3 className="font-display text-lg font-semibold">Prefer WhatsApp?</h3>
-            <p className="mt-1 text-sm text-muted-foreground">Send us a message anytime — most replies inside an hour during business hours.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Send us a message anytime, most replies inside an hour during business hours.</p>
             <Button asChild className="mt-4 w-full bg-[#25D366] hover:bg-[#25D366]/90 text-white">
               <a href={buildWhatsappLink(s.company_whatsapp, "Hello Bright Edge, I'd like to discuss a property.")} target="_blank" rel="noopener noreferrer">
                 <MessageCircle className="mr-2 h-4 w-4" /> Chat on WhatsApp

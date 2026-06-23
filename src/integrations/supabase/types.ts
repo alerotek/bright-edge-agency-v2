@@ -179,6 +179,7 @@ export type Database = {
           excerpt: string | null
           featured: boolean
           featured_image: string | null
+          gallery_images: Json
           id: string
           meta_description: string | null
           meta_title: string | null
@@ -198,6 +199,7 @@ export type Database = {
           excerpt?: string | null
           featured?: boolean
           featured_image?: string | null
+          gallery_images?: Json
           id?: string
           meta_description?: string | null
           meta_title?: string | null
@@ -217,6 +219,7 @@ export type Database = {
           excerpt?: string | null
           featured?: boolean
           featured_image?: string | null
+          gallery_images?: Json
           id?: string
           meta_description?: string | null
           meta_title?: string | null
@@ -820,6 +823,7 @@ export type Database = {
           excerpt: string | null
           featured: boolean
           featured_image: string | null
+          gallery_images: Json
           id: string
           location_id: string | null
           meta_description: string | null
@@ -839,6 +843,7 @@ export type Database = {
           excerpt?: string | null
           featured?: boolean
           featured_image?: string | null
+          gallery_images?: Json
           id?: string
           location_id?: string | null
           meta_description?: string | null
@@ -858,6 +863,7 @@ export type Database = {
           excerpt?: string | null
           featured?: boolean
           featured_image?: string | null
+          gallery_images?: Json
           id?: string
           location_id?: string | null
           meta_description?: string | null
