@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Award, Clock, Compass, MessageCircle, ShieldCheck, Sparkles, Star } from "lucide-react";
+import { ArrowRight, Award, Clock, Compass, Home, MessageCircle, ShieldCheck, Star } from "lucide-react";
 import {
   allBlogPostsQuery,
   allReviewsQuery,
@@ -55,27 +55,26 @@ function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="relative isolate overflow-hidden">
+      <section className="relative isolate overflow-hidden bg-slate-900">
         <div
           aria-hidden
-          className="absolute inset-0 -z-10"
+          className="absolute inset-0 -z-10 opacity-70"
           style={{ background: "var(--gradient-hero)" }}
         />
         <div
           aria-hidden
-          className="absolute inset-0 -z-10 opacity-30"
+          className="absolute inset-0 -z-10 opacity-60"
           style={{
             backgroundImage:
               "url(https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&q=80)",
             backgroundSize: "cover",
             backgroundPosition: "center",
-            mixBlendMode: "overlay",
           }}
         />
         <div className="mx-auto max-w-7xl px-4 pb-24 pt-24 sm:px-6 sm:pt-32 lg:px-8 lg:pb-32">
           <div className="max-w-3xl">
             <Badge className="bg-white/10 text-white hover:bg-white/15 border border-white/20">
-              <Sparkles className="mr-1.5 h-3 w-3" /> New listings every week
+              <Home className="mr-1.5 h-3 w-3" /> New listings every week
             </Badge>
             <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight text-white sm:text-6xl">
               {settings?.hero_headline ?? "Find Your Next Property With Confidence"}
