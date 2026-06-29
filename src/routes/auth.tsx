@@ -4,7 +4,6 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/site/Logo";
@@ -36,10 +35,16 @@ function AuthPage() {
 
   const signInGoogle = async () => {
     setBusy(true);
-    const res = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (res.error) { toast.error("Google sign-in failed", { description: (res.error as Error).message }); setBusy(false); return; }
-    if (res.redirected) return;
-    finishLogin();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/auth",
+      },
+    });
+    if (error) {
+      toast.error("Google sign-in failed", { description: error.message });
+      setBusy(false);
+    }
   };
 
   const signInEmail = async (e: React.FormEvent) => {
