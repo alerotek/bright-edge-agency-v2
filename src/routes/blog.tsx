@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowRight } from "lucide-react";
 import { allBlogPostsQuery } from "@/lib/queries";
 import { formatDate } from "@/lib/format";
 
@@ -42,8 +43,9 @@ function BlogPage() {
             </Link>
             <p className="mt-1 text-sm text-muted-foreground">{formatDate(p.published_at)} · {p.reading_minutes ?? 5} min read</p>
             <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{p.excerpt}</p>
-            <Link to="/blog/$slug" params={{ slug: p.slug }} className="mt-3 inline-flex items-center text-sm font-semibold text-primary hover:underline">
-              Read more →
+            <Link to="/blog/$slug" params={{ slug: p.slug }} className="group/link mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+              Read more
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
             </Link>
           </article>
         ))}

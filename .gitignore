@@ -19,6 +19,10 @@ dist-ssr
 # Vercel
 .vercel
 
+# Admin setup scripts (contain service_role usage, keep out of repo)
+create-admin.mjs
+create-admin.ps1
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

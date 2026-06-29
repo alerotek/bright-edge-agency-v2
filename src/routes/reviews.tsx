@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Star } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import { allReviewsQuery } from "@/lib/queries";
 import { formatDate } from "@/lib/format";
 
@@ -49,8 +49,9 @@ function ReviewsPage() {
               </Link>
               <p className="line-clamp-3 text-sm text-muted-foreground">{r.excerpt}</p>
               <p className="text-xs text-muted-foreground">{formatDate(r.published_at)}{r.property?.location?.name ? ` · ${r.property.location.name}` : ""}</p>
-              <Link to="/reviews/$slug" params={{ slug: r.slug }} className="mt-auto inline-flex items-center pt-2 text-sm font-semibold text-primary hover:underline">
-                Read full review →
+              <Link to="/reviews/$slug" params={{ slug: r.slug }} className="group/link mt-auto inline-flex items-center gap-1 pt-2 text-sm font-semibold text-primary">
+                Read full review
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/link:translate-x-0.5" />
               </Link>
             </div>
           </article>
