@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
 import { allBlogPostsQuery } from "@/lib/queries";
@@ -20,8 +20,8 @@ export const Route = createFileRoute("/blog")({
 
 function BlogPage() {
   const { data: posts = [] } = useQuery(allBlogPostsQuery);
-  const match = Route.useMatch();
-  const isIndex = match.id === "/blog";
+  const location = useLocation();
+  const isIndex = location.pathname === "/blog" || location.pathname === "/blog/";
   return (
     <>
       {isIndex && (

@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, Phone } from "lucide-react";
 import { allAgentsQuery } from "@/lib/queries";
@@ -19,8 +19,8 @@ export const Route = createFileRoute("/agents")({
 
 function AgentsPage() {
   const { data: agents = [] } = useQuery(allAgentsQuery);
-  const match = Route.useMatch();
-  const isIndex = match.id === "/agents";
+  const location = useLocation();
+  const isIndex = location.pathname === "/agents" || location.pathname === "/agents/";
   return (
     <>
       {isIndex && (

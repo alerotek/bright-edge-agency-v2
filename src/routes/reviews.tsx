@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Star } from "lucide-react";
 import { allReviewsQuery } from "@/lib/queries";
@@ -20,8 +20,8 @@ export const Route = createFileRoute("/reviews")({
 
 function ReviewsPage() {
   const { data: reviews = [] } = useQuery(allReviewsQuery);
-  const match = Route.useMatch();
-  const isIndex = match.id === "/reviews";
+  const location = useLocation();
+  const isIndex = location.pathname === "/reviews" || location.pathname === "/reviews/";
   return (
     <>
       {isIndex && (
