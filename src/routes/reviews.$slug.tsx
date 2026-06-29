@@ -32,7 +32,7 @@ export const Route = createFileRoute("/reviews/$slug")({
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Review",
-            itemReviewed: { "@type": "Residence", name: r.property?.title ?? r.title },
+            itemReviewed: { "@type": "Residence", name: r.property?.title || r.title },
             reviewBody: r.excerpt ?? "",
             reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
             datePublished: r.published_at,
