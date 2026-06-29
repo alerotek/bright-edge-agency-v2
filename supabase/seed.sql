@@ -150,7 +150,7 @@ INSERT INTO public.blog_posts (title, slug, excerpt, content, featured_image, ca
 SELECT
   title, slug, excerpt, content, featured_image,
   (SELECT id FROM public.blog_categories WHERE slug = category_slug),
-  status, featured, reading_minutes, published_at, gallery_images::jsonb
+  status::blog_post_status, featured, reading_minutes, published_at, gallery_images::jsonb
 FROM (VALUES
   ('5 Things to Know Before Buying in Nairobi', '5-things-before-buying-nairobi', 'The Nairobi property market moves fast. Here is what every buyer should research before making an offer.', 'The Nairobi real estate market has seen remarkable growth over the past decade, with emerging neighborhoods offering excellent value for both investors and homebuyers. Before making your purchase, consider these five critical factors: location appreciation trends, infrastructure developments, title deed verification, service charge structures, and rental yield potential. This guide walks you through each consideration with insights from our team of local experts who have facilitated over 500 transactions across the city.', 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1200&q=80', 'buying-guide', 'published', true, 6, now() - interval '3 days', jsonb_build_array(
     'https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1600&q=80',
@@ -193,7 +193,7 @@ SELECT
   title, slug, excerpt, content, featured_image,
   (SELECT id FROM public.properties WHERE slug = property_slug),
   (SELECT id FROM public.locations WHERE slug = location_slug),
-  rating, status, featured, published_at, gallery_images::jsonb
+  rating, status::review_status, featured, published_at, gallery_images::jsonb
 FROM (VALUES
   ('Why We Chose Westlands', 'why-we-chose-westlands', 'A young family shares their journey to finding the perfect apartment in Westlands.', 'After months of searching across Nairobi, we finally found our dream apartment in Westlands. The location offers everything we need: proximity to excellent schools, a short commute to work, and a vibrant social scene. Our agent Amina made the process seamless, guiding us through every step from viewing to closing. The building amenities, especially the rooftop pool and gym, sealed the deal for our family.', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80', 'luxury-4br-apartment-westlands', 'westlands', 5.0, 'published', true, now() - interval '4 days', jsonb_build_array(
     'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600&q=80',
@@ -237,9 +237,9 @@ ON CONFLICT DO NOTHING;
 
 -- Contact requests (3 general inquiries)
 INSERT INTO public.contact_requests (full_name, email, phone, subject, message, status, created_at) VALUES
-  ('Alice Muthoni', 'alice.m@email.com', '+254722111010', 'Property Valuation', 'I would like to get a valuation for my 3-bedroom apartment in Kilimani. What is the process?', 'new', now() - interval '2 days'),
-  ('Samuel Kibe', 'sam.kibe@email.com', '+254722111011', 'Investment Advice', 'I have a budget of KES 50M and am looking for investment property advice. Can we schedule a call?', 'new', now() - interval '4 days'),
-  ('Nairobi Tech Ltd', 'office@nairobi-tech.co.ke', '+254722111012', 'Office Space', 'We are a 50-person tech company looking for 5000+ sqft office space. Do you have availability along Mombasa Road?', 'contacted', now() - interval '6 days')
+  ('Alice Muthoni', 'alice.m@email.com', '+254722111010', 'Property Valuation', 'I would like to get a valuation for my 3-bedroom apartment in Kilimani. What is the process?', 'new'::lead_status, now() - interval '2 days'),
+  ('Samuel Kibe', 'sam.kibe@email.com', '+254722111011', 'Investment Advice', 'I have a budget of KES 50M and am looking for investment property advice. Can we schedule a call?', 'new'::lead_status, now() - interval '4 days'),
+  ('Nairobi Tech Ltd', 'office@nairobi-tech.co.ke', '+254722111012', 'Office Space', 'We are a 50-person tech company looking for 5000+ sqft office space. Do you have availability along Mombasa Road?', 'contacted'::lead_status, now() - interval '6 days')
 ON CONFLICT DO NOTHING;
 
 -- Newsletter subscribers
