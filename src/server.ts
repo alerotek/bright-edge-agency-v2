@@ -1,23 +1,10 @@
 import { renderErrorPage } from "./lib/error-page";
+import { createStartHandler, defaultStreamHandler } from "@tanstack/react-start/server";
 
-type ServerEntry = {
-  fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
-};
+const fetch = createStartHandler(defaultStreamHandler);
 
-let serverEntryPromise: Promise<ServerEntry> | undefined;
-
-async function getServerEntry(): Promise<ServerEntry> {
-  if (!serverEntryPromise) {
-    serverEntryPromise = import("@tanstack/react-start/server-entry").then(
-      (m) => (m.default ?? m) as ServerEntry,
-    );
-  }
-  return serverEntryPromise;
-}
-
-export default async function handler(request: Request): Promise<Response> {
-  const entry = await getServerEntry();
-  const response = await entry.fetch(request, {}, {});
+async function fetchWithFallback(request: Request): Promise<Response> {
+  const response = await fetch(request, {}, {});
 
   if (response.status >= 500) {
     const contentType = response.headers.get("content-type") ?? "";
@@ -35,3 +22,5 @@ export default async function handler(request: Request): Promise<Response> {
 
   return response;
 }
+
+export default { fetch: fetchWithFallback };
