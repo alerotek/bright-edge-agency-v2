@@ -10,6 +10,8 @@ export const Route = createFileRoute("/reviews/$slug")({
   loader: async ({ context, params }) => {
     const data = await context.queryClient.ensureQueryData(reviewBySlugQuery(params.slug));
     if (!data) throw notFound();
+    // Preload related reviews to avoid SSR issues
+    await context.queryClient.ensureQueryData(allReviewsQuery);
     return data;
   },
   head: ({ loaderData, params }) => {
@@ -88,6 +90,7 @@ function ReviewDetail() {
       </div>
 
       <article className="mx-auto max-w-3xl px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mb-4 rounded bg-primary/10 px-3 py-1 text-xs text-primary">Detail page v2</div>
         {/* Back + share */}
         <div className="flex items-center justify-between">
           <Link to="/reviews" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
