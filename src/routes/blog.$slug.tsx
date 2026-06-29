@@ -90,7 +90,6 @@ function BlogPost() {
       </div>
 
       <article className="mx-auto max-w-3xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mb-4 rounded bg-primary/10 px-3 py-1 text-xs text-primary">Detail page v2</div>
         {/* Back + share */}
         <div className="flex items-center justify-between">
           <Link to="/blog" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
