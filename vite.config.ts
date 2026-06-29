@@ -8,9 +8,7 @@ import path from "node:path";
 
 export default defineConfig({
   plugins: [
-    tanstackStart({
-      server: { entry: "server" },
-    }),
+    tanstackStart(),
     nitro({ preset: "vercel" }),
     viteReact(),
     tailwindcss(),
