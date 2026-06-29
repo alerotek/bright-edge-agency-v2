@@ -58,7 +58,7 @@ export function Footer() {
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-2 px-4 py-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:px-6 lg:px-8">
           <span>© {new Date().getFullYear()} {s?.company_name ?? "Bright Edge Agency"}. All rights reserved.</span>
-          <span>Crafted in Nairobi. Listings updated daily.</span>
+          <span>Powered by{" "}<a href="https://alerotek.co.ke/" target="_blank" rel="noopener noreferrer" className="font-semibold text-foreground hover:text-primary">ALEROTEK</a>. All rights reserved.</span>
         </div>
       </div>
     </footer>
