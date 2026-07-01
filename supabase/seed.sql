@@ -62,14 +62,14 @@ INSERT INTO public.settings (id, company_name, tagline, primary_phone, primary_e
 VALUES (1, 'Bright Edge Agency', 'Connecting You To Exceptional Spaces', '+254790595993', 'hello@brightedge.co.ke', '+254790595993', 'Westlands Commercial Centre, Nairobi, Kenya', 'Mon-Fri 8am-6pm, Sat 9am-1pm', 'Find Your Next Home', 'Curated properties across Kenya', 'Bright Edge Agency | Premium Real Estate in Kenya', 'Curated luxury and residential properties for sale and rent across Nairobi and the Kenyan coast.')
 ON CONFLICT (id) DO NOTHING;
 
--- Agents
-INSERT INTO public.agents (full_name, slug, position, bio, photo, phone, email, whatsapp, display_order, active) VALUES
-  ('Amina Mwangi', 'amina-mwangi', 'Senior Sales Consultant', 'Based in Westlands, Amina is a luxury residential specialist with 8 years of experience helping clients find premium apartments and penthouses across Nairobi.', 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&q=80', '+254790595990', 'amina@brightedge.co.ke', '+254790595990', 1, true),
-  ('Brian Otieno', 'brian-otieno', 'Lettings Manager', 'Brian leads executive rentals across Kilimani and Kileleshwa, matching expats and professionals with fully furnished homes and seamless tenant placement.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80', '+254790595991', 'brian@brightedge.co.ke', '+254790595991', 2, true),
-  ('Cynthia Kimani', 'cynthia-kimani', 'Coastal Specialist', 'Cynthia is Bright Edge coastal expert, based out of Nyali and covering the Mombasa coastline, with deep knowledge of beachfront apartments and holiday homes.', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80', '+254790595992', 'cynthia@brightedge.co.ke', '+254790595992', 3, true),
-  ('David Njoroge', 'david-njoroge', 'Investment Advisor', 'David focuses on the fast-growing Mombasa Road corridor, helping investors identify high-growth commercial and land opportunities in Nairobi.', 'https://images.unsplash.com/photo-1542909168-82c3f7d6e6db?w=600&q=80', '+254790595993', 'david@brightedge.co.ke', '+254790595993', 4, true),
-  ('Esther Wambui', 'esther-wambui', 'Client Relations', 'Esther is based at our Westlands office and ensures every client journey, from first inquiry to final closing, is seamless across all listings.', 'https://images.unsplash.com/photo-1580489944151-d52b76e4fa97?w=600&q=80', '+254790595994', 'esther@brightedge.co.ke', '+254790595994', 5, true),
-  ('Felix Mutiso', 'felix-mutiso', 'Commercial Lead', 'Felix specializes in office and retail space along the Mombasa Road business corridor, helping corporates secure Grade-A commercial leases.', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80', '+254790595995', 'felix@brightedge.co.ke', '+254790595995', 6, true)
+-- Agents (with V2 fields)
+INSERT INTO public.agents (full_name, slug, position, bio, photo, phone, email, whatsapp, display_order, active, verification_status, license_number, commission_rate, team_name, specializations, languages, years_experience, public_badge, verification_level, phone_verified_at, email_verified_at, onboarding_completed, published_listing_count, reviewed_listing_count, areas_of_operation, social_accounts) VALUES
+  ('Amina Mwangi', 'amina-mwangi', 'Senior Sales Consultant', 'Based in Westlands, Amina is a luxury residential specialist with 8 years of experience helping clients find premium apartments and penthouses across Nairobi.', 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&q=80', '+254790595990', 'amina@brightedge.co.ke', '+254790595990', 1, true, 'verified', 'EA-2024-001', 2.5, 'Westlands Elite Team', ARRAY['luxury', 'apartments', 'penthouses'], ARRAY['English', 'Swahili'], 8, true, 'premium', now() - interval '30 days', now() - interval '30 days', true, 12, 8, '[{"country":"Kenya","county":"Nairobi","town":"Nairobi","neighbourhood":"Westlands"}]'::jsonb, '[{"platform":"linkedin","handle":"amina-mwangi","url":"https://linkedin.com/in/amina-mwangi","is_verified":true},{"platform":"instagram","handle":"amina.brightedge","url":"https://instagram.com/amina.brightedge","is_verified":false}]'::jsonb),
+  ('Brian Otieno', 'brian-otieno', 'Lettings Manager', 'Brian leads executive rentals across Kilimani and Kileleshwa, matching expats and professionals with fully furnished homes and seamless tenant placement.', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80', '+254790595991', 'brian@brightedge.co.ke', '+254790595991', 2, true, 'verified', 'EA-2024-002', 2.0, 'Rental Solutions Team', ARRAY['rentals', 'executive', 'furnished'], ARRAY['English', 'Swahili', 'French'], 6, true, 'premium', now() - interval '25 days', now() - interval '25 days', true, 18, 15, '[{"country":"Kenya","county":"Nairobi","town":"Nairobi","neighbourhood":"Kilimani"},{"country":"Kenya","county":"Nairobi","town":"Nairobi","neighbourhood":"Kileleshwa"}]'::jsonb, '[{"platform":"linkedin","handle":"brian-otieno","url":"https://linkedin.com/in/brian-otieno","is_verified":true}]'::jsonb),
+  ('Cynthia Kimani', 'cynthia-kimani', 'Coastal Specialist', 'Cynthia is Bright Edge coastal expert, based out of Nyali and covering the Mombasa coastline, with deep knowledge of beachfront apartments and holiday homes.', 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80', '+254790595992', 'cynthia@brightedge.co.ke', '+254790595992', 3, true, 'verified', 'EA-2024-003', 3.0, 'Coastal Properties Team', ARRAY['coastal', 'beachfront', 'holiday'], ARRAY['English', 'Swahili', 'German'], 10, true, 'premium', now() - interval '20 days', now() - interval '20 days', true, 8, 6, '[{"country":"Kenya","county":"Mombasa","town":"Mombasa","neighbourhood":"Nyali"},{"country":"Kenya","county":"Kwale","town":"Diani"}]'::jsonb, '[{"platform":"instagram","handle":"cynthia.coastal","url":"https://instagram.com/cynthia.coastal","is_verified":true}]'::jsonb),
+  ('David Njoroge', 'david-njoroge', 'Investment Advisor', 'David focuses on the fast-growing Mombasa Road corridor, helping investors identify high-growth commercial and land opportunities in Nairobi.', 'https://images.unsplash.com/photo-1542909168-82c3f7d6e6db?w=600&q=80', '+254790595993', 'david@brightedge.co.ke', '+254790595993', 4, true, 'verified', 'EA-2024-004', 2.5, 'Investment Advisory Team', ARRAY['investment', 'commercial', 'land'], ARRAY['English', 'Swahili'], 7, true, 'premium', now() - interval '15 days', now() - interval '15 days', true, 5, 4, '[{"country":"Kenya","county":"Machakos","town":"Athi River"},{"country":"Kenya","county":"Nairobi","town":"Nairobi","neighbourhood":"Mombasa Road"}]'::jsonb, '[{"platform":"linkedin","handle":"david-njoroge","url":"https://linkedin.com/in/david-njoroge","is_verified":true}]'::jsonb),
+  ('Esther Wambui', 'esther-wambui', 'Client Relations', 'Esther is based at our Westlands office and ensures every client journey, from first inquiry to final closing, is seamless across all listings.', 'https://images.unsplash.com/photo-1580489944151-d52b76e4fa97?w=600&q=80', '+254790595994', 'esther@brightedge.co.ke', '+254790595994', 5, true, 'verified', 'EA-2024-005', 1.5, 'Client Success Team', ARRAY['customer-service', 'relations'], ARRAY['English', 'Swahili'], 5, true, 'basic', now() - interval '10 days', now() - interval '10 days', true, 0, 0, '[{"country":"Kenya","county":"Nairobi","town":"Nairobi"}]'::jsonb, '[]'::jsonb),
+  ('Felix Mutiso', 'felix-mutiso', 'Commercial Lead', 'Felix specializes in office and retail space along the Mombasa Road business corridor, helping corporates secure Grade-A commercial leases.', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80', '+254790595995', 'felix@brightedge.co.ke', '+254790595995', 6, true, 'verified', 'EA-2024-006', 3.0, 'Commercial Leasing Team', ARRAY['commercial', 'office', 'retail'], ARRAY['English', 'Swahili'], 9, true, 'premium', now() - interval '35 days', now() - interval '35 days', true, 3, 2, '[{"country":"Kenya","county":"Nairobi","town":"Nairobi","neighbourhood":"Mombasa Road"}]'::jsonb, '[{"platform":"linkedin","handle":"felix-mutiso","url":"https://linkedin.com/in/felix-mutiso","is_verified":true}]'::jsonb)
 ON CONFLICT (slug) DO NOTHING;
 
 -- Wipe existing properties so this seed always overrides
@@ -80,9 +80,9 @@ DELETE FROM public.property_reviews;
 DELETE FROM public.inquiries WHERE property_id IS NOT NULL;
 DELETE FROM public.properties;
 
--- Properties (8 sample listings)
+-- Properties (8 sample listings with V2 fields)
 -- Using subqueries to resolve FKs by slug/name
-INSERT INTO public.properties (title, slug, excerpt, description, category_id, property_type_id, status_id, location_id, agent_id, listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, publish_status, featured, published_at)
+INSERT INTO public.properties (title, slug, excerpt, description, category_id, property_type_id, status_id, location_id, agent_id, listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, publish_status, featured, published_at, validation_status, listing_expires_at, auto_renew, syndicated, promoted_until, virtual_tour_url, floor_plan_url, house_hunting_fee_kes, viewing_fee_kes, fees_refundable, fee_payment_timing, commission_kes, commission_notes, video_url, video_provider, country, county, town, neighbourhood, landmark, available_from, furnished_status, lease_period, deposit_amount_kes, utilities_info, marketing_score, marketing_checklist, ai_captions, suggested_hashtags)
 SELECT
   title, slug, excerpt, description,
   (SELECT id FROM public.property_categories WHERE slug = category_slug),
@@ -90,29 +90,36 @@ SELECT
   (SELECT id FROM public.property_statuses WHERE slug = status_slug),
   (SELECT id FROM public.locations WHERE slug = location_slug),
   (SELECT id FROM public.agents WHERE slug = agent_slug),
-  listing_type::property_listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, 'draft'::property_publish_status, featured, published_at
+  listing_type::property_listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, 'draft'::property_publish_status, featured, published_at,
+  'active'::listing_validation_status, now() + interval '90 days', true, false, now() + interval '30 days',
+  virtual_tour_url, floor_plan_url, house_hunting_fee, viewing_fee, fees_refundable, fee_payment,
+  commission_kes, commission_notes, video_url, video_provider,
+  country, county, town, neighbourhood, landmark,
+  available_from, furnished_status, lease_period, deposit_kes, utilities_info,
+  marketing_score, marketing_checklist::jsonb, ai_captions, suggested_hashtags::text[]
 FROM (VALUES
-  ('Luxury 4BR Apartment in Westlands', 'luxury-4br-apartment-westlands', 'Stunning penthouse with panoramic city views and premium finishes throughout.', 'This exceptional 4-bedroom apartment occupies the top floor of Westlands most prestigious address. Floor-to-ceiling windows flood the open-plan living space with natural light, while the master suite features a walk-in ensuite and private balcony. Building amenities include a rooftop pool, gym, 24-hour security, and dedicated parking.', 'residential', 'apartment', 'available', 'westlands', 'amina-mwangi', 'sale', 45000000, 'KES', 4, 3, 2800, 'Westlands Commercial Centre, Nairobi', true, now() - interval '2 days'),
-  ('Modern Villa in Kilimani', 'modern-villa-kilimani', 'Spacious family home with landscaped garden and home office.', 'A beautifully appointed 5-bedroom villa set in the heart of Kilimani. The property features a large landscaped garden, separate staff quarters, a dedicated home office, and a spacious open-plan kitchen with granite countertops. Gated community with 24-hour security and backup generator.', 'residential', 'villa', 'available', 'kilimani', 'brian-otieno', 'sale', 85000000, 'KES', 5, 4, 4500, 'Kilimani Road, Nairobi', true, now() - interval '5 days'),
-  ('Beachfront Apartment in Nyali', 'beachfront-apartment-nyali', 'Wake up to ocean views in this stunning coastal retreat.', 'This 3-bedroom beachfront apartment offers uninterrupted Indian Ocean views from every room. The open-plan design flows onto a wide terrace perfect for entertaining. Complex amenities include direct beach access, infinity pool, and 24-hour security. Ideal as a holiday home or rental investment.', 'residential', 'apartment', 'available', 'nyali', 'cynthia-kimani', 'sale', 32000000, 'KES', 3, 2, 1800, 'Nyali Beach Road, Mombasa', true, now() - interval '1 day'),
-  ('Executive Rental in Kileleshwa', 'executive-rental-kileleshwa', 'Fully furnished 3BR in a quiet leafy suburb.', 'A beautifully furnished 3-bedroom townhouse available for executive rental. Features include modern kitchen, spacious lounge, private garden, and staff quarters. Located in a quiet secure neighborhood with easy access to major roads. Rent includes service charge and internet.', 'residential', 'townhouse', 'available', 'kileleshwa', 'brian-otieno', 'rent', 350000, 'KES', 3, 3, 2200, 'Kileleshwa Drive, Nairobi', false, now() - interval '3 days'),
-  ('Commercial Office Park Mombasa Rd', 'commercial-office-park-mombasa-rd', 'Grade-A office space in a thriving business corridor.', 'Modern office park offering flexible floor plates from 500 to 5000 sqft. Features include high-speed lifts, backup power, ample parking, and 24-hour security. Ideal for corporates seeking a strategic location along the busy Mombasa Road corridor with excellent visibility.', 'commercial', 'office', 'available', 'mombasa-road', 'felix-mutiso', 'rent', 1800000, 'KES', 0, 4, 12000, 'Mombasa Road, Nairobi', false, now() - interval '7 days'),
-  ('Prime Development Land in Athi River', 'prime-development-land-athi-river', '5-acre plot with approved mixed-use plans.', 'A prime 5-acre plot located 500m from the Nairobi-Mombasa highway with approved mixed-use development plans. The land has a clean title, access road, and water connection. Ideal for residential or commercial development in this fast-growing corridor.', 'land', 'plot', 'available', 'mombasa-road', 'david-njoroge', 'sale', 75000000, 'KES', 0, 0, 217800, 'Athi River, Machakos', false, now() - interval '10 days'),
-  ('Penthouse Suite in Westlands', 'penthouse-suite-westlands', 'Ultra-luxury penthouse with private rooftop terrace.', 'The finest penthouse in Westlands. This 4000 sqft masterpiece features a double-volume living area, private rooftop terrace with jacuzzi, chef kitchen with Miele appliances, and a master suite with his-and-hers walk-in closets. Two parking spaces and a storage room included.', 'residential', 'apartment', 'under-offer', 'westlands', 'amina-mwangi', 'sale', 120000000, 'KES', 4, 4, 4000, 'Waiyaki Way, Westlands', true, now() - interval '14 days'),
-  ('Coastal Villa with Private Beach', 'coastal-villa-private-beach', 'Exclusive 6BR villa with direct beach access on the Kenyan coast.', 'An extraordinary 6-bedroom villa set on 2 acres of manicured grounds with 200m of private beach frontage. Features include an infinity pool overlooking the ocean, separate guest house, staff quarters for 4, and a tropical garden with mature coconut palms. A once-in-a-lifetime opportunity.', 'residential', 'villa', 'available', 'nyali', 'cynthia-kimani', 'sale', 250000000, 'KES', 6, 5, 8000, 'Diani Beach Road, Kwale', true, now() - interval '1 day')
-) AS v(title, slug, excerpt, description, category_slug, type_slug, status_slug, location_slug, agent_slug, listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, featured, published_at)
+  ('Luxury 4BR Apartment in Westlands', 'luxury-4br-apartment-westlands', 'Stunning penthouse with panoramic city views and premium finishes throughout.', 'This exceptional 4-bedroom apartment occupies the top floor of Westlands most prestigious address. Floor-to-ceiling windows flood the open-plan living space with natural light, while the master suite features a walk-in ensuite and private balcony. Building amenities include a rooftop pool, gym, 24-hour security, and dedicated parking.', 'residential', 'apartment', 'available', 'westlands', 'amina-mwangi', 'sale', 45000000, 'KES', 4, 3, 2800, 'Westlands Commercial Centre, Nairobi', true, now() - interval '2 days', 'https://matterport.com/demo/tour', 'https://example.com/floorplans/westlands-penthouse.pdf', 50000, 10000, true, 'before_viewing', 1125000, '2.5% commission on final sale price', 'https://youtube.com/watch?v=demo', 'youtube', 'Kenya', 'Nairobi', 'Nairobi', 'Westlands', 'Westlands Commercial Centre', NULL, 'semi-furnished', NULL, NULL, 'Water and electricity included in service charge', 85, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true}]'::jsonb, 'Experience luxury living in Westlands with this stunning penthouse featuring panoramic city views and premium finishes throughout.', ARRAY['luxury', 'penthouse', 'westlands', 'nairobi', 'cityviews']),
+  ('Modern Villa in Kilimani', 'modern-villa-kilimani', 'Spacious family home with landscaped garden and home office.', 'A beautifully appointed 5-bedroom villa set in the heart of Kilimani. The property features a large landscaped garden, separate staff quarters, a dedicated home office, and a spacious open-plan kitchen with granite countertops. Gated community with 24-hour security and backup generator.', 'residential', 'villa', 'available', 'kilimani', 'brian-otieno', 'sale', 85000000, 'KES', 5, 4, 4500, 'Kilimani Road, Nairobi', true, now() - interval '5 days', 'https://matterport.com/demo/tour2', 'https://example.com/floorplans/kilimani-villa.pdf', 75000, 15000, true, 'before_viewing', 2125000, '2.5% commission on final sale price', 'https://youtube.com/watch?v=demo2', 'youtube', 'Kenya', 'Nairobi', 'Nairobi', 'Kilimani', 'Kilimani Road', NULL, 'fully-furnished', NULL, NULL, 'Solar water heating, backup generator included', 90, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true},{"task":"video","completed":true}]'::jsonb, 'Spacious family villa in Kilimani with landscaped garden, home office, and premium finishes. Perfect for families seeking luxury living.', ARRAY['villa', 'family', 'kilimani', 'garden', 'luxury']),
+  ('Beachfront Apartment in Nyali', 'beachfront-apartment-nyali', 'Wake up to ocean views in this stunning coastal retreat.', 'This 3-bedroom beachfront apartment offers uninterrupted Indian Ocean views from every room. The open-plan design flows onto a wide terrace perfect for entertaining. Complex amenities include direct beach access, infinity pool, and 24-hour security. Ideal as a holiday home or rental investment.', 'residential', 'apartment', 'available', 'nyali', 'cynthia-kimani', 'sale', 32000000, 'KES', 3, 2, 1800, 'Nyali Beach Road, Mombasa', true, now() - interval '1 day', 'https://matterport.com/demo/tour3', 'https://example.com/floorplans/nyali-beach.pdf', 40000, 8000, true, 'before_viewing', 960000, '3% commission on final sale price', 'https://youtube.com/watch?v=demo3', 'youtube', 'Kenya', 'Mombasa', 'Mombasa', 'Nyali', 'Nyali Beach Mall', NULL, 'semi-furnished', NULL, NULL, 'Beach access, pool maintenance included', 88, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true}]'::jsonb, 'Stunning beachfront apartment in Nyali with uninterrupted Indian Ocean views. Perfect holiday home or rental investment.', ARRAY['beachfront', 'oceanview', 'nyali', 'mombasa', 'coastal']),
+  ('Executive Rental in Kileleshwa', 'executive-rental-kileleshwa', 'Fully furnished 3BR in a quiet leafy suburb.', 'A beautifully furnished 3-bedroom townhouse available for executive rental. Features include modern kitchen, spacious lounge, private garden, and staff quarters. Located in a quiet secure neighborhood with easy access to major roads. Rent includes service charge and internet.', 'residential', 'townhouse', 'available', 'kileleshwa', 'brian-otieno', 'rent', 350000, 'KES', 3, 3, 2200, 'Kileleshwa Drive, Nairobi', false, now() - interval '3 days', NULL, NULL, 0, 0, false, NULL, NULL, NULL, NULL, NULL, 'Kenya', 'Nairobi', 'Nairobi', 'Kileleshwa', 'Kileleshwa Drive', now() + interval '30 days', 'fully-furnished', '12 months', 700000, 'Rent includes service charge, internet, and gardener', 75, '[{"task":"photos","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true}]'::jsonb, 'Fully furnished executive townhouse in quiet Kileleshwa. Modern kitchen, private garden, staff quarters included.', ARRAY['rental', 'furnished', 'executive', 'kileleshwa', 'townhouse']),
+  ('Commercial Office Park Mombasa Rd', 'commercial-office-park-mombasa-rd', 'Grade-A office space in a thriving business corridor.', 'Modern office park offering flexible floor plates from 500 to 5000 sqft. Features include high-speed lifts, backup power, ample parking, and 24-hour security. Ideal for corporates seeking a strategic location along the busy Mombasa Road corridor with excellent visibility.', 'commercial', 'office', 'available', 'mombasa-road', 'felix-mutiso', 'rent', 1800000, 'KES', 0, 4, 12000, 'Mombasa Road, Nairobi', false, now() - interval '7 days', NULL, NULL, 0, 0, false, NULL, NULL, NULL, NULL, NULL, 'Kenya', 'Nairobi', 'Nairobi', 'Industrial Area', 'Jomo Kenyatta International Airport', NULL, NULL, '36 months', 5400000, 'Rent includes security, cleaning, and maintenance of common areas', 80, '[{"task":"photos","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true}]'::jsonb, 'Grade-A office space on Mombasa Road. Flexible floor plates, backup power, ample parking. Ideal for corporates.', ARRAY['commercial', 'office', 'mombasa-road', 'grade-a', 'corporate']),
+  ('Prime Development Land in Athi River', 'prime-development-land-athi-river', '5-acre plot with approved mixed-use plans.', 'A prime 5-acre plot located 500m from the Nairobi-Mombasa highway with approved mixed-use development plans. The land has a clean title, access road, and water connection. Ideal for residential or commercial development in this fast-growing corridor.', 'land', 'plot', 'available', 'mombasa-road', 'david-njoroge', 'sale', 75000000, 'KES', 0, 0, 217800, 'Athi River, Machakos', false, now() - interval '10 days', NULL, NULL, 0, 0, false, NULL, NULL, NULL, NULL, NULL, 'Kenya', 'Machakos', 'Athi River', NULL, 'Namanga Road', NULL, NULL, NULL, NULL, 'Water and electricity connected at boundary', 70, '[{"task":"photos","completed":true},{"task":"title_search","completed":true},{"task":"survey","completed":true},{"task":"description","completed":true}]'::jsonb, 'Prime 5-acre development plot in Athi River with approved mixed-use plans. Clean title, water connected.', ARRAY['land', 'development', 'athi-river', 'investment', 'plot']),
+  ('Penthouse Suite in Westlands', 'penthouse-suite-westlands', 'Ultra-luxury penthouse with private rooftop terrace.', 'The finest penthouse in Westlands. This 4000 sqft masterpiece features a double-volume living area, private rooftop terrace with jacuzzi, chef kitchen with Miele appliances, and a master suite with his-and-hers walk-in closets. Two parking spaces and a storage room included.', 'residential', 'apartment', 'under-offer', 'westlands', 'amina-mwangi', 'sale', 120000000, 'KES', 4, 4, 4000, 'Waiyaki Way, Westlands', true, now() - interval '14 days', 'https://matterport.com/demo/tour4', 'https://example.com/floorplans/westlands-ultra.pdf', 100000, 20000, true, 'before_viewing', 3000000, '2.5% commission on final sale price', 'https://youtube.com/watch?v=demo4', 'youtube', 'Kenya', 'Nairobi', 'Nairobi', 'Westlands', 'Sarit Centre', NULL, 'fully-furnished', NULL, NULL, 'Smart home system, private lift access', 95, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true},{"task":"video","completed":true},{"task":"smart_home","completed":true}]'::jsonb, 'Ultra-luxury Westlands penthouse with private rooftop terrace, jacuzzi, and chef kitchen. 4000 sqft of pure elegance.', ARRAY['penthouse', 'ultra-luxury', 'rooftop', 'westlands', 'smart-home']),
+  ('Coastal Villa with Private Beach', 'coastal-villa-private-beach', 'Exclusive 6BR villa with direct beach access on the Kenyan coast.', 'An extraordinary 6-bedroom villa set on 2 acres of manicured grounds with 200m of private beach frontage. Features include an infinity pool overlooking the ocean, separate guest house, staff quarters for 4, and a tropical garden with mature coconut palms. A once-in-a-lifetime opportunity.', 'residential', 'villa', 'available', 'nyali', 'cynthia-kimani', 'sale', 250000000, 'KES', 6, 5, 8000, 'Diani Beach Road, Kwale', true, now() - interval '1 day', 'https://matterport.com/demo/tour5', 'https://example.com/floorplans/diani-villa.pdf', 150000, 30000, true, 'before_viewing', 7500000, '3% commission on final sale price', 'https://youtube.com/watch?v=demo5', 'youtube', 'Kenya', 'Kwale', 'Diani', NULL, 'Diani Beach', NULL, 'fully-furnished', NULL, NULL, 'Private beach access, infinity pool, guest house, staff quarters included', 92, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true},{"task":"video","completed":true},{"task":"aerial_footage","completed":true}]'::jsonb, 'Exclusive 6-bedroom villa with 200m private beach frontage in Diani. Infinity pool, guest house, tropical garden.', ARRAY['villa', 'beachfront', 'private-beach', 'diani', 'luxury', 'oceanfront'])
+) AS v(title, slug, excerpt, description, category_slug, type_slug, status_slug, location_slug, agent_slug, listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, featured, published_at, validation_status, listing_expires_at, auto_renew, syndicated, promoted_until, virtual_tour_url, floor_plan_url, house_hunting_fee, viewing_fee, fees_refundable, fee_payment, commission_kes, commission_notes, video_url, video_provider, country, county, town, neighbourhood, landmark, available_from, furnished_status, lease_period, deposit_kes, utilities_info, marketing_score, marketing_checklist, ai_captions, suggested_hashtags)
 ON CONFLICT (slug) DO NOTHING;
 
--- Property images (4 per property, satisfies min-3 trigger)
-INSERT INTO public.property_images (property_id, image_url, alt_text, image_order, is_featured)
-SELECT p.id, img.url, img.alt, img.ord, img.featured
+-- Property images (5 per property, satisfies min-5 trigger for V2)
+INSERT INTO public.property_images (property_id, image_url, alt_text, image_order, is_featured, image_hash, image_width, image_height, image_bytes)
+SELECT p.id, img.url, img.alt, img.ord, img.featured, img.hash, img.width, img.height, img.bytes
 FROM public.properties p
 CROSS JOIN LATERAL (VALUES
-  ('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80', 'Exterior view', 1, true),
-  ('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80', 'Living room', 2, false),
-  ('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80', 'Kitchen', 3, false),
-  ('https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80', 'Master bedroom', 4, false)
-) AS img(url, alt, ord, featured)
+  ('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80', 'Exterior view', 1, true, 'hash1', 1200, 800, 250000),
+  ('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&q=80', 'Living room', 2, false, 'hash2', 1200, 800, 280000),
+  ('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&q=80', 'Kitchen', 3, false, 'hash3', 1200, 800, 260000),
+  ('https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&q=80', 'Master bedroom', 4, false, 'hash4', 1200, 800, 240000),
+  ('https://images.unsplash.com/photo-1505691938895-1758d7feb511?w=1200&q=80', 'Bathroom', 5, false, 'hash5', 1200, 800, 220000)
+) AS img(url, alt, ord, featured, hash, width, height, bytes)
 WHERE p.publish_status = 'draft'
 ON CONFLICT DO NOTHING;
 
@@ -259,3 +266,94 @@ INSERT INTO public.activity_logs (action, entity_type, entity_id, metadata, crea
   ('agent_created', 'agents', (SELECT id FROM public.agents WHERE slug = 'amina-mwangi'), '{"source": "seed"}'::jsonb, now() - interval '30 days'),
   ('settings_updated', 'settings', null, '{"fields": ["company_name", "tagline"]}'::jsonb, now() - interval '10 days')
 ON CONFLICT DO NOTHING;
+
+-- ============================================================
+-- V2 ADDITIONS: Short links, QR codes, lead sources, agent documents
+-- ============================================================
+
+-- Short links (sample tracking links)
+INSERT INTO public.short_links (code, target_type, target_id, target_path, long_url, click_count, created_at)
+SELECT code, target_type::short_link_target_type, target_id, target_path, long_url, click_count, created_at
+FROM (VALUES
+  ('lux4br', 'property', (SELECT id FROM public.properties WHERE slug = 'luxury-4br-apartment-westlands'), '/properties/luxury-4br-apartment-westlands', 'https://brightedge.co.ke/properties/luxury-4br-apartment-westlands', 45, now() - interval '2 days'),
+  ('modvil', 'property', (SELECT id FROM public.properties WHERE slug = 'modern-villa-kilimani'), '/properties/modern-villa-kilimani', 'https://brightedge.co.ke/properties/modern-villa-kilimani', 32, now() - interval '5 days'),
+  ('beachny', 'property', (SELECT id FROM public.properties WHERE slug = 'beachfront-apartment-nyali'), '/properties/beachfront-apartment-nyali', 'https://brightedge.co.ke/properties/beachfront-apartment-nyali', 67, now() - interval '1 day'),
+  ('aminam', 'agent', (SELECT id FROM public.agents WHERE slug = 'amina-mwangi'), '/agents/amina-mwangi', 'https://brightedge.co.ke/agents/amina-mwangi', 28, now() - interval '10 days')
+) AS v(code, target_type, target_id, target_path, long_url, click_count, created_at)
+ON CONFLICT (code) DO NOTHING;
+
+-- Property QR codes (sample QR codes for properties)
+INSERT INTO public.property_qr_codes (property_id, short_link_id, storage_path, public_url, format, byte_size)
+SELECT p.id, sl.id, storage_path, public_url, format, byte_size
+FROM public.properties p
+JOIN public.short_links sl ON sl.target_id = p.id
+CROSS JOIN LATERAL (VALUES
+  ('qr_codes/' || p.slug || '.png', 'https://storage.brightedge.co.ke/qr/' || p.slug || '.png', 'png', 45000)
+) AS q(storage_path, public_url, format, byte_size)
+WHERE p.slug IN ('luxury-4br-apartment-westlands', 'modern-villa-kilimani', 'beachfront-apartment-nyali')
+ON CONFLICT DO NOTHING;
+
+-- Lead sources (sample attribution data)
+INSERT INTO public.lead_sources (inquiry_id, property_id, channel, referrer, utm_source, utm_medium, utm_campaign, created_at)
+SELECT
+  (SELECT id FROM public.inquiries WHERE email = 'peter.kamau@email.com'),
+  (SELECT id FROM public.properties WHERE slug = 'luxury-4br-apartment-westlands'),
+  'short_link'::lead_source_channel, 'https://facebook.com', 'facebook', 'social', 'q3_2024_campaign', now() - interval '1 day'
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.lead_sources (inquiry_id, property_id, channel, referrer, utm_source, utm_medium, created_at)
+SELECT
+  (SELECT id FROM public.inquiries WHERE email = 'grace.w@email.com'),
+  (SELECT id FROM public.properties WHERE slug = 'modern-villa-kilimani'),
+  'website'::lead_source_channel, 'https://google.com', 'google', 'organic', now() - interval '3 days'
+ON CONFLICT DO NOTHING;
+
+-- Agent documents (sample verification documents)
+INSERT INTO public.agent_documents (agent_id, kind, storage_path, public_url, mime_type, byte_size, review_status)
+SELECT
+  (SELECT id FROM public.agents WHERE slug = 'amina-mwangi'),
+  kind::agent_document_kind, storage_path, public_url, mime_type, byte_size, review_status
+FROM (VALUES
+  ('national_id_front', 'docs/amina-id-front.jpg', 'https://storage.brightedge.co.ke/docs/amina-id-front.jpg', 'image/jpeg', 150000, 'approved'),
+  ('national_id_back', 'docs/amina-id-back.jpg', 'https://storage.brightedge.co.ke/docs/amina-id-back.jpg', 'image/jpeg', 145000, 'approved'),
+  ('profile_photo', 'docs/amina-profile.jpg', 'https://storage.brightedge.co.ke/docs/amina-profile.jpg', 'image/jpeg', 280000, 'approved')
+) AS v(kind, storage_path, public_url, mime_type, byte_size, review_status)
+ON CONFLICT DO NOTHING;
+
+-- Agent social accounts (sample social media links)
+INSERT INTO public.agent_social_accounts (agent_id, platform, handle, url, is_verified)
+SELECT
+  (SELECT id FROM public.agents WHERE slug = 'amina-mwangi'),
+  platform::social_platform, handle, url, is_verified
+FROM (VALUES
+  ('linkedin', 'amina-mwangi', 'https://linkedin.com/in/amina-mwangi', true),
+  ('instagram', 'amina.brightedge', 'https://instagram.com/amina.brightedge', false)
+) AS v(platform, handle, url, is_verified)
+ON CONFLICT DO NOTHING;
+
+-- Agent areas (sample areas of operation)
+INSERT INTO public.agent_areas (agent_id, country, county, town, neighbourhood)
+SELECT
+  (SELECT id FROM public.agents WHERE slug = 'amina-mwangi'),
+  country, county, town, neighbourhood
+FROM (VALUES
+  ('Kenya', 'Nairobi', 'Nairobi', 'Westlands'),
+  ('Kenya', 'Nairobi', 'Nairobi', 'Kilimani'),
+  ('Kenya', 'Nairobi', 'Nairobi', 'Lavington')
+) AS v(country, county, town, neighbourhood)
+ON CONFLICT DO NOTHING;
+
+-- Projects (sample development projects)
+INSERT INTO public.projects (name, slug, developer, country, county, town, neighbourhood, description, hero_image, launch_date, completion_date, status)
+VALUES
+  ('Westlands Heights', 'westlands-heights', 'Bright Edge Developers', 'Kenya', 'Nairobi', 'Nairobi', 'Westlands', 'Premium mixed-use development featuring residential apartments, retail spaces, and office suites in the heart of Westlands.', 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80', '2024-01-15', '2026-06-30', 'under_construction'),
+  ('Coastal Paradise', 'coastal-paradise', 'Ocean View Estates', 'Kenya', 'Kwale', 'Diani', 'Diani Beach', 'Luxury beachfront development with direct ocean access, private pools, and world-class amenities.', 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=1200&q=80', '2024-03-01', '2027-12-31', 'planning')
+ON CONFLICT (slug) DO NOTHING;
+
+-- Link some properties to projects
+UPDATE public.properties SET project_id = (SELECT id FROM public.projects WHERE slug = 'westlands-heights')
+WHERE slug = 'luxury-4br-apartment-westlands';
+
+UPDATE public.properties SET project_id = (SELECT id FROM public.projects WHERE slug = 'coastal-paradise')
+WHERE slug = 'beachfront-apartment-nyali';
+
