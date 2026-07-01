@@ -397,7 +397,7 @@ WHERE p.publish_status = 'published';
 
 CREATE OR REPLACE VIEW public.public_agent_view AS
 SELECT
-  a.id, a.slug, a.full_name, a.photo, a.bio, a.role, a.team_name, a.specializations,
+  a.id, a.slug, a.full_name, a.photo, a.bio, a.team_name, a.specializations,
   a.email, a.phone, a.whatsapp, a.license_number, a.verification_status,
   a.verification_level, a.public_badge, a.active, a.display_order,
   a.facebook_url, a.instagram_url, a.twitter_url, a.linkedin_url, a.youtube_url
