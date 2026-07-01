@@ -43,6 +43,7 @@ function AdminProperties() {
               <TableHead>Location</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Score</TableHead>
               <TableHead>Agent</TableHead>
               <TableHead className="w-24 text-right">Actions</TableHead>
             </TableRow>
@@ -61,6 +62,17 @@ function AdminProperties() {
                       {p.publish_status === "published" ? <Eye className="mr-1 h-3 w-3" /> : <EyeOff className="mr-1 h-3 w-3" />}
                       {p.publish_status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-2 w-12 overflow-hidden rounded-full bg-muted">
+                        <div 
+                          className="h-full bg-primary transition-all" 
+                          style={{ width: `${p.marketing_score}%` }} 
+                        />
+                      </div>
+                      <span className="text-xs font-medium">{p.marketing_score}%</span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground">{p.agent?.full_name ?? "—"}</TableCell>
                   <TableCell className="text-right">

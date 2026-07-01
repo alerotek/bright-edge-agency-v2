@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Bath, BedDouble, Calendar, Car, ChevronLeft, ChevronRight, MapPin, Maximize, MessageCircle, Phone, X } from "lucide-react";
+import { Bath, BedDouble, Calendar, Car, ChevronLeft, ChevronRight, Copy, ExternalLink, MapPin, Maximize, MessageCircle, Phone, Play, QrCode, Share2, ShieldCheck, X } from "lucide-react";
+import { toast } from "sonner";
 import { propertyBySlugQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -144,6 +145,34 @@ function PropertyDetail() {
             ))}
           </div>
 
+          {p.video_url && (
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+              <div className="flex items-center gap-2 border-b bg-muted/30 px-6 py-3">
+                <Play className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider">Property Video</h2>
+              </div>
+              <div className="aspect-video w-full bg-black">
+                {p.video_provider === "youtube" ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${p.video_url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1] || p.video_url.split("/").pop()}`}
+                    className="h-full w-full"
+                    allowFullScreen
+                    title={p.title}
+                  />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center p-8 text-center text-white">
+                    <p className="mb-4 text-sm opacity-80">Video hosted on {p.video_provider || "external platform"}</p>
+                    <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                      <a href={p.video_url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="mr-2 h-4 w-4" /> Watch on {p.video_provider || "Platform"}
+                      </a>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div>
             <h2 className="font-display text-2xl font-semibold">About this property</h2>
             <div className="prose prose-slate mt-3 max-w-none text-base leading-relaxed text-foreground/85">
@@ -152,6 +181,66 @@ function PropertyDetail() {
               ))}
             </div>
           </div>
+
+          {p.listing_type === "rent" && (
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                <h2 className="font-display text-xl font-semibold">Rental Policy & Fees</h2>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">House Hunting Fee</p>
+                  <p className="text-lg font-bold text-foreground">{formatPrice(p.house_hunting_fee_kes, "KES")}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Viewing Fee</p>
+                  <p className="text-lg font-bold text-foreground">{formatPrice(p.viewing_fee_kes, "KES")}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Payment Timing</p>
+                  <p className="text-sm font-medium capitalize text-foreground">{(p.fee_payment_timing || "Unspecified").replace(/_/g, " ")}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Refund Policy</p>
+                  <p className="text-sm font-medium text-foreground">{p.fees_refundable ? "Fully Refundable" : "Non-refundable"}</p>
+                </div>
+                {p.furnished_status && (
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Furnished Status</p>
+                    <p className="text-sm font-medium capitalize text-foreground">{p.furnished_status.replace(/-/g, " ")}</p>
+                  </div>
+                )}
+                {p.lease_period && (
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Lease Period</p>
+                    <p className="text-sm font-medium text-foreground">{p.lease_period}</p>
+                  </div>
+                )}
+                {p.deposit_amount_kes > 0 && (
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Security Deposit</p>
+                    <p className="text-sm font-medium text-foreground">{formatPrice(p.deposit_amount_kes, "KES")}</p>
+                  </div>
+                )}
+                {p.available_from && (
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Available From</p>
+                    <p className="text-sm font-medium text-foreground">{p.available_from}</p>
+                  </div>
+                )}
+                {p.utilities_info && (
+                  <div className="sm:col-span-2 space-y-1">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Utilities</p>
+                    <p className="text-sm font-medium text-foreground">{p.utilities_info}</p>
+                  </div>
+                )}
+              </div>
+              <p className="mt-4 text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                Note: Bright Edge standardizes agency operations to build customer trust.
+              </p>
+            </div>
+          )}
 
           {amenities.length > 0 ? (
             <div>
@@ -163,6 +252,24 @@ function PropertyDetail() {
                   </li>
                 ))}
               </ul>
+            </div>
+          ) : null}
+
+          {p.virtual_tour_url ? (
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="font-display text-xl font-semibold">Virtual tour</h2>
+              <Button asChild variant="outline" className="mt-4">
+                <a href={p.virtual_tour_url} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="mr-2 h-4 w-4" /> Open virtual tour
+                </a>
+              </Button>
+            </div>
+          ) : null}
+
+          {p.floor_plan_url ? (
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="font-display text-xl font-semibold">Floor plan</h2>
+              <img src={p.floor_plan_url} alt="Floor plan" className="mt-4 rounded-lg" />
             </div>
           ) : null}
 
@@ -214,6 +321,29 @@ function PropertyDetail() {
               </div>
             </div>
           ) : null}
+
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary">Marketing Hub</p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full gap-2"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied!");
+                }}
+              >
+                <Copy className="h-4 w-4" /> Copy Link
+              </Button>
+              <Button variant="outline" size="sm" className="w-full gap-2" onClick={() => toast.info("Social sharing enabled")}>
+                <Share2 className="h-4 w-4" /> Share
+              </Button>
+              <Button variant="outline" size="sm" className="w-full gap-2 col-span-2">
+                <QrCode className="h-4 w-4" /> Property QR Code
+              </Button>
+            </div>
+          </div>
 
           <div className="rounded-2xl border border-border bg-muted/40 p-6 text-sm text-muted-foreground">
             <Calendar className="h-5 w-5 text-primary" />

@@ -27,6 +27,7 @@ export const adminPropertiesQuery = queryOptions({
       .from("properties")
       .select(`
         id, title, slug, price, currency, listing_type, publish_status, featured, created_at,
+        marketing_score,
         location:locations(name),
         agent:agents(full_name),
         images:property_images(id)
@@ -169,4 +170,38 @@ export const blogCategoriesQuery = queryOptions({
     if (error) throw error;
     return data ?? [];
   },
+});
+
+export const marketingAssetsQuery = queryOptions({
+  queryKey: ["admin", "marketing", "assets"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("marketing_assets")
+      .select(`
+        id, asset_type, title, description, file_url, thumbnail_url,
+        provider, provider_id, views_count, created_at,
+        property:properties(id,title), agent:agents(id,full_name)
+      `)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+  staleTime: 30_000,
+});
+
+export const socialVideosQuery = queryOptions({
+  queryKey: ["admin", "marketing", "videos"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("social_videos")
+      .select(`
+        id, title, description, video_url, provider, provider_video_id,
+        thumbnail_url, published, created_at,
+        property:properties(id,title), agent:agents(id,full_name)
+      `)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+  staleTime: 30_000,
 });

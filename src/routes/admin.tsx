@@ -11,6 +11,8 @@ import {
   Settings,
   LogOut,
   ChevronRight,
+  Image,
+  Video,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -35,6 +37,7 @@ const nav = [
   { to: "/admin/blog", icon: PenLine, label: "Blog" },
   { to: "/admin/reviews", icon: Star, label: "Reviews" },
   { to: "/admin/locations", icon: MapPin, label: "Locations" },
+  { to: "/admin/marketing/assets", icon: Image, label: "Marketing" },
   { to: "/admin/settings", icon: Settings, label: "Settings" },
 ];
 

@@ -23,7 +23,12 @@ const propertyListSelect = `
   status:property_statuses(id,name,slug,color),
   category:property_categories(id,name,slug),
   agent:agents(id,full_name,slug,photo,phone,whatsapp,email),
-  images:property_images(id,image_url,alt_text,image_order,is_featured)
+  images:property_images(id,image_url,alt_text,image_order,is_featured),
+  virtual_tour_url, floor_plan_url, promoted_until, validation_status,
+  house_hunting_fee_kes, viewing_fee_kes, fees_refundable, fee_payment_timing,
+  video_url, video_provider,
+  available_from, furnished_status, lease_period, deposit_amount_kes, utilities_info,
+  marketing_score, marketing_checklist, ai_captions, suggested_hashtags
 `;
 
 export type PropertyListItem = {
@@ -52,6 +57,25 @@ export type PropertyListItem = {
     phone: string | null; whatsapp: string | null; email: string | null;
   } | null;
   images: Array<{ id: string; image_url: string; alt_text: string | null; image_order: number; is_featured: boolean }>;
+  virtual_tour_url: string | null;
+  floor_plan_url: string | null;
+  promoted_until: string | null;
+  validation_status: string | null;
+  house_hunting_fee_kes: number | null;
+  viewing_fee_kes: number | null;
+  fees_refundable: boolean;
+  fee_payment_timing: string | null;
+  video_url: string | null;
+  video_provider: string | null;
+  available_from: string | null;
+  furnished_status: "unfurnished" | "semi-furnished" | "fully-furnished";
+  lease_period: string | null;
+  deposit_amount_kes: number | null;
+  utilities_info: string | null;
+  marketing_score: number;
+  marketing_checklist: any[];
+  ai_captions: string | null;
+  suggested_hashtags: string[];
 };
 
 export const featuredPropertiesQuery = queryOptions({

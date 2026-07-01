@@ -18,14 +18,17 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AgentsRouteImport } from './routes/agents'
+import { Route as AgentSignupRouteImport } from './routes/agent-signup'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AgentIndexRouteImport } from './routes/agent/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ReviewsSlugRouteImport } from './routes/reviews.$slug'
 import { Route as PropertySlugRouteImport } from './routes/property.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AgentsSlugRouteImport } from './routes/agents.$slug'
+import { Route as AgentOnboardingRouteImport } from './routes/agent/onboarding'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin/settings/index'
 import { Route as AdminReviewsIndexRouteImport } from './routes/admin/reviews/index'
 import { Route as AdminPropertiesIndexRouteImport } from './routes/admin/properties/index'
@@ -34,7 +37,12 @@ import { Route as AdminInquiriesIndexRouteImport } from './routes/admin/inquirie
 import { Route as AdminBlogIndexRouteImport } from './routes/admin/blog/index'
 import { Route as AdminAgentsIndexRouteImport } from './routes/admin/agents/index'
 import { Route as AdminPropertiesNewRouteImport } from './routes/admin/properties/_new'
+import { Route as AdminPropertiesIdRouteImport } from './routes/admin/properties/$id'
 import { Route as AdminAgentsNewRouteImport } from './routes/admin/agents/_new'
+import { Route as AdminMarketingVideosIndexRouteImport } from './routes/admin/marketing/videos/index'
+import { Route as AdminMarketingAssetsIndexRouteImport } from './routes/admin/marketing/assets/index'
+import { Route as AdminMarketingVideosNewRouteImport } from './routes/admin/marketing/videos/_new'
+import { Route as AdminMarketingAssetsNewRouteImport } from './routes/admin/marketing/assets/_new'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -81,6 +89,11 @@ const AgentsRoute = AgentsRouteImport.update({
   path: '/agents',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgentSignupRoute = AgentSignupRouteImport.update({
+  id: '/agent-signup',
+  path: '/agent-signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -94,6 +107,11 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentIndexRoute = AgentIndexRouteImport.update({
+  id: '/agent/',
+  path: '/agent/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -120,6 +138,11 @@ const AgentsSlugRoute = AgentsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => AgentsRoute,
+} as any)
+const AgentOnboardingRoute = AgentOnboardingRouteImport.update({
+  id: '/agent/onboarding',
+  path: '/agent/onboarding',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
   id: '/settings/',
@@ -161,9 +184,36 @@ const AdminPropertiesNewRoute = AdminPropertiesNewRouteImport.update({
   path: '/properties',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPropertiesIdRoute = AdminPropertiesIdRouteImport.update({
+  id: '/properties/$id',
+  path: '/properties/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAgentsNewRoute = AdminAgentsNewRouteImport.update({
   id: '/agents/_new',
   path: '/agents',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketingVideosIndexRoute =
+  AdminMarketingVideosIndexRouteImport.update({
+    id: '/marketing/videos/',
+    path: '/marketing/videos/',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminMarketingAssetsIndexRoute =
+  AdminMarketingAssetsIndexRouteImport.update({
+    id: '/marketing/assets/',
+    path: '/marketing/assets/',
+    getParentRoute: () => AdminRoute,
+  } as any)
+const AdminMarketingVideosNewRoute = AdminMarketingVideosNewRouteImport.update({
+  id: '/marketing/videos/_new',
+  path: '/marketing/videos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMarketingAssetsNewRoute = AdminMarketingAssetsNewRouteImport.update({
+  id: '/marketing/assets/_new',
+  path: '/marketing/assets',
   getParentRoute: () => AdminRoute,
 } as any)
 
@@ -171,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/agent-signup': typeof AgentSignupRoute
   '/agents': typeof AgentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
@@ -180,12 +231,15 @@ export interface FileRoutesByFullPath {
   '/reviews': typeof ReviewsRouteWithChildren
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/agent/onboarding': typeof AgentOnboardingRoute
   '/agents/$slug': typeof AgentsSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/property/$slug': typeof PropertySlugRoute
   '/reviews/$slug': typeof ReviewsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/agent/': typeof AgentIndexRoute
   '/admin/agents': typeof AdminAgentsNewRoute
+  '/admin/properties/$id': typeof AdminPropertiesIdRoute
   '/admin/properties': typeof AdminPropertiesNewRoute
   '/admin/agents/': typeof AdminAgentsIndexRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
@@ -194,10 +248,15 @@ export interface FileRoutesByFullPath {
   '/admin/properties/': typeof AdminPropertiesIndexRoute
   '/admin/reviews/': typeof AdminReviewsIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
+  '/admin/marketing/assets': typeof AdminMarketingAssetsNewRoute
+  '/admin/marketing/videos': typeof AdminMarketingVideosNewRoute
+  '/admin/marketing/assets/': typeof AdminMarketingAssetsIndexRoute
+  '/admin/marketing/videos/': typeof AdminMarketingVideosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/agent-signup': typeof AgentSignupRoute
   '/agents': typeof AgentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
@@ -207,24 +266,30 @@ export interface FileRoutesByTo {
   '/reviews': typeof ReviewsRouteWithChildren
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/agent/onboarding': typeof AgentOnboardingRoute
   '/agents/$slug': typeof AgentsSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/property/$slug': typeof PropertySlugRoute
   '/reviews/$slug': typeof ReviewsSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/agent': typeof AgentIndexRoute
   '/admin/agents': typeof AdminAgentsIndexRoute
+  '/admin/properties/$id': typeof AdminPropertiesIdRoute
   '/admin/properties': typeof AdminPropertiesIndexRoute
   '/admin/blog': typeof AdminBlogIndexRoute
   '/admin/inquiries': typeof AdminInquiriesIndexRoute
   '/admin/locations': typeof AdminLocationsIndexRoute
   '/admin/reviews': typeof AdminReviewsIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
+  '/admin/marketing/assets': typeof AdminMarketingAssetsIndexRoute
+  '/admin/marketing/videos': typeof AdminMarketingVideosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
+  '/agent-signup': typeof AgentSignupRoute
   '/agents': typeof AgentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
@@ -234,12 +299,15 @@ export interface FileRoutesById {
   '/reviews': typeof ReviewsRouteWithChildren
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/agent/onboarding': typeof AgentOnboardingRoute
   '/agents/$slug': typeof AgentsSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/property/$slug': typeof PropertySlugRoute
   '/reviews/$slug': typeof ReviewsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/agent/': typeof AgentIndexRoute
   '/admin/agents/_new': typeof AdminAgentsNewRoute
+  '/admin/properties/$id': typeof AdminPropertiesIdRoute
   '/admin/properties/_new': typeof AdminPropertiesNewRoute
   '/admin/agents/': typeof AdminAgentsIndexRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
@@ -248,6 +316,10 @@ export interface FileRoutesById {
   '/admin/properties/': typeof AdminPropertiesIndexRoute
   '/admin/reviews/': typeof AdminReviewsIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
+  '/admin/marketing/assets/_new': typeof AdminMarketingAssetsNewRoute
+  '/admin/marketing/videos/_new': typeof AdminMarketingVideosNewRoute
+  '/admin/marketing/assets/': typeof AdminMarketingAssetsIndexRoute
+  '/admin/marketing/videos/': typeof AdminMarketingVideosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -255,6 +327,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/admin'
+    | '/agent-signup'
     | '/agents'
     | '/auth'
     | '/blog'
@@ -264,12 +337,15 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/services'
     | '/terms'
+    | '/agent/onboarding'
     | '/agents/$slug'
     | '/blog/$slug'
     | '/property/$slug'
     | '/reviews/$slug'
     | '/admin/'
+    | '/agent/'
     | '/admin/agents'
+    | '/admin/properties/$id'
     | '/admin/properties'
     | '/admin/agents/'
     | '/admin/blog/'
@@ -278,10 +354,15 @@ export interface FileRouteTypes {
     | '/admin/properties/'
     | '/admin/reviews/'
     | '/admin/settings/'
+    | '/admin/marketing/assets'
+    | '/admin/marketing/videos'
+    | '/admin/marketing/assets/'
+    | '/admin/marketing/videos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/agent-signup'
     | '/agents'
     | '/auth'
     | '/blog'
@@ -291,23 +372,29 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/services'
     | '/terms'
+    | '/agent/onboarding'
     | '/agents/$slug'
     | '/blog/$slug'
     | '/property/$slug'
     | '/reviews/$slug'
     | '/admin'
+    | '/agent'
     | '/admin/agents'
+    | '/admin/properties/$id'
     | '/admin/properties'
     | '/admin/blog'
     | '/admin/inquiries'
     | '/admin/locations'
     | '/admin/reviews'
     | '/admin/settings'
+    | '/admin/marketing/assets'
+    | '/admin/marketing/videos'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/admin'
+    | '/agent-signup'
     | '/agents'
     | '/auth'
     | '/blog'
@@ -317,12 +404,15 @@ export interface FileRouteTypes {
     | '/reviews'
     | '/services'
     | '/terms'
+    | '/agent/onboarding'
     | '/agents/$slug'
     | '/blog/$slug'
     | '/property/$slug'
     | '/reviews/$slug'
     | '/admin/'
+    | '/agent/'
     | '/admin/agents/_new'
+    | '/admin/properties/$id'
     | '/admin/properties/_new'
     | '/admin/agents/'
     | '/admin/blog/'
@@ -331,12 +421,17 @@ export interface FileRouteTypes {
     | '/admin/properties/'
     | '/admin/reviews/'
     | '/admin/settings/'
+    | '/admin/marketing/assets/_new'
+    | '/admin/marketing/videos/_new'
+    | '/admin/marketing/assets/'
+    | '/admin/marketing/videos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AgentSignupRoute: typeof AgentSignupRoute
   AgentsRoute: typeof AgentsRouteWithChildren
   AuthRoute: typeof AuthRoute
   BlogRoute: typeof BlogRouteWithChildren
@@ -346,7 +441,9 @@ export interface RootRouteChildren {
   ReviewsRoute: typeof ReviewsRouteWithChildren
   ServicesRoute: typeof ServicesRoute
   TermsRoute: typeof TermsRoute
+  AgentOnboardingRoute: typeof AgentOnboardingRoute
   PropertySlugRoute: typeof PropertySlugRoute
+  AgentIndexRoute: typeof AgentIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -414,6 +511,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agent-signup': {
+      id: '/agent-signup'
+      path: '/agent-signup'
+      fullPath: '/agent-signup'
+      preLoaderRoute: typeof AgentSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -433,6 +537,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent/': {
+      id: '/agent/'
+      path: '/agent'
+      fullPath: '/agent/'
+      preLoaderRoute: typeof AgentIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -469,6 +580,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/agents/$slug'
       preLoaderRoute: typeof AgentsSlugRouteImport
       parentRoute: typeof AgentsRoute
+    }
+    '/agent/onboarding': {
+      id: '/agent/onboarding'
+      path: '/agent/onboarding'
+      fullPath: '/agent/onboarding'
+      preLoaderRoute: typeof AgentOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/settings/': {
       id: '/admin/settings/'
@@ -526,11 +644,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPropertiesNewRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/properties/$id': {
+      id: '/admin/properties/$id'
+      path: '/properties/$id'
+      fullPath: '/admin/properties/$id'
+      preLoaderRoute: typeof AdminPropertiesIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/agents/_new': {
       id: '/admin/agents/_new'
       path: '/agents'
       fullPath: '/admin/agents'
       preLoaderRoute: typeof AdminAgentsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing/videos/': {
+      id: '/admin/marketing/videos/'
+      path: '/marketing/videos'
+      fullPath: '/admin/marketing/videos/'
+      preLoaderRoute: typeof AdminMarketingVideosIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing/assets/': {
+      id: '/admin/marketing/assets/'
+      path: '/marketing/assets'
+      fullPath: '/admin/marketing/assets/'
+      preLoaderRoute: typeof AdminMarketingAssetsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing/videos/_new': {
+      id: '/admin/marketing/videos/_new'
+      path: '/marketing/videos'
+      fullPath: '/admin/marketing/videos'
+      preLoaderRoute: typeof AdminMarketingVideosNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/marketing/assets/_new': {
+      id: '/admin/marketing/assets/_new'
+      path: '/marketing/assets'
+      fullPath: '/admin/marketing/assets'
+      preLoaderRoute: typeof AdminMarketingAssetsNewRouteImport
       parentRoute: typeof AdminRoute
     }
   }
@@ -539,6 +692,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminAgentsNewRoute: typeof AdminAgentsNewRoute
+  AdminPropertiesIdRoute: typeof AdminPropertiesIdRoute
   AdminPropertiesNewRoute: typeof AdminPropertiesNewRoute
   AdminAgentsIndexRoute: typeof AdminAgentsIndexRoute
   AdminBlogIndexRoute: typeof AdminBlogIndexRoute
@@ -547,11 +701,16 @@ interface AdminRouteChildren {
   AdminPropertiesIndexRoute: typeof AdminPropertiesIndexRoute
   AdminReviewsIndexRoute: typeof AdminReviewsIndexRoute
   AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
+  AdminMarketingAssetsNewRoute: typeof AdminMarketingAssetsNewRoute
+  AdminMarketingVideosNewRoute: typeof AdminMarketingVideosNewRoute
+  AdminMarketingAssetsIndexRoute: typeof AdminMarketingAssetsIndexRoute
+  AdminMarketingVideosIndexRoute: typeof AdminMarketingVideosIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminAgentsNewRoute: AdminAgentsNewRoute,
+  AdminPropertiesIdRoute: AdminPropertiesIdRoute,
   AdminPropertiesNewRoute: AdminPropertiesNewRoute,
   AdminAgentsIndexRoute: AdminAgentsIndexRoute,
   AdminBlogIndexRoute: AdminBlogIndexRoute,
@@ -560,6 +719,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPropertiesIndexRoute: AdminPropertiesIndexRoute,
   AdminReviewsIndexRoute: AdminReviewsIndexRoute,
   AdminSettingsIndexRoute: AdminSettingsIndexRoute,
+  AdminMarketingAssetsNewRoute: AdminMarketingAssetsNewRoute,
+  AdminMarketingVideosNewRoute: AdminMarketingVideosNewRoute,
+  AdminMarketingAssetsIndexRoute: AdminMarketingAssetsIndexRoute,
+  AdminMarketingVideosIndexRoute: AdminMarketingVideosIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -600,6 +763,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
+  AgentSignupRoute: AgentSignupRoute,
   AgentsRoute: AgentsRouteWithChildren,
   AuthRoute: AuthRoute,
   BlogRoute: BlogRouteWithChildren,
@@ -609,7 +773,9 @@ const rootRouteChildren: RootRouteChildren = {
   ReviewsRoute: ReviewsRouteWithChildren,
   ServicesRoute: ServicesRoute,
   TermsRoute: TermsRoute,
+  AgentOnboardingRoute: AgentOnboardingRoute,
   PropertySlugRoute: PropertySlugRoute,
+  AgentIndexRoute: AgentIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

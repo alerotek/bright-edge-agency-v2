@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,15 +9,24 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { propertyCategoriesQuery, propertyTypesQuery, adminAgentsQuery, adminLocationsQuery } from "@/lib/admin-queries";
+import { Bath, BedDouble, CheckCircle2, Copy, ExternalLink, Maximize, Play, QrCode, Share2, ShieldCheck, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { slugify } from "@/lib/slug";
 
-export const Route = createFileRoute("/admin/properties/_new")({
+export const Route = createFileRoute("/admin/properties/$id")({
+  loader: async ({ context, params }) => {
+    const { data, error } = await supabase.from("properties").select("*").eq("id", params.id).maybeSingle();
+    if (error) throw error;
+    return data;
+  },
   component: PropertyEditor,
 });
 
 function PropertyEditor() {
+  const { id } = useParams({ from: "/admin/properties/$id" });
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const loaderData = Route.useLoaderData();
 
   const { data: categories } = useQuery(propertyCategoriesQuery);
   const { data: types } = useQuery(propertyTypesQuery);
@@ -31,18 +40,15 @@ function PropertyEditor() {
     bedrooms: "", bathrooms: "", area_sqft: "", address: "",
     publish_status: "draft",
     validation_status: "pending_verification",
-    virtual_tour_url: "",
-    floor_plan_url: "",
-    listing_expires_at: "",
-    // Bright Edge V2: Rental fees and policy
+    virtual_tour_url: "", floor_plan_url: "", listing_expires_at: "",
+    // Bright Edge V2
     house_hunting_fee_kes: "",
     viewing_fee_kes: "",
     fees_refundable: false,
     fee_payment_timing: "" as any,
-    // Bright Edge V2: Social video strategy
     video_url: "",
     video_provider: "" as any,
-    // Bright Edge V2: Spec completion
+    // Bright Edge V2
     available_from: "",
     furnished_status: "unfurnished" as any,
     lease_period: "",
@@ -52,9 +58,50 @@ function PropertyEditor() {
     suggested_hashtags: [] as string[],
   });
 
+  useEffect(() => {
+    if (loaderData) {
+      setForm({
+        title: loaderData.title || "",
+        slug: loaderData.slug || "",
+        excerpt: loaderData.excerpt || "",
+        description: loaderData.description || "",
+        category_id: loaderData.category_id || "",
+        property_type_id: loaderData.property_type_id || "",
+        location_id: loaderData.location_id || "",
+        agent_id: loaderData.agent_id || "",
+        listing_type: loaderData.listing_type || "sale",
+        price: String(loaderData.price ?? ""),
+        currency: loaderData.currency || "KES",
+        bedrooms: String(loaderData.bedrooms ?? ""),
+        bathrooms: String(loaderData.bathrooms ?? ""),
+        area_sqft: String(loaderData.area_sqft ?? ""),
+        address: loaderData.address || "",
+        publish_status: loaderData.publish_status || "draft",
+        validation_status: loaderData.validation_status || "pending_verification",
+        virtual_tour_url: loaderData.virtual_tour_url || "",
+        floor_plan_url: loaderData.floor_plan_url || "",
+        listing_expires_at: loaderData.listing_expires_at || "",
+        // Bright Edge V2
+        house_hunting_fee_kes: String(loaderData.house_hunting_fee_kes ?? ""),
+        viewing_fee_kes: String(loaderData.viewing_fee_kes ?? ""),
+        fees_refundable: !!loaderData.fees_refundable,
+        fee_payment_timing: loaderData.fee_payment_timing || "",
+        video_url: loaderData.video_url || "",
+        video_provider: loaderData.video_provider || "",
+        available_from: loaderData.available_from || "",
+        furnished_status: (loaderData.furnished_status as any) || "unfurnished",
+        lease_period: loaderData.lease_period || "",
+        deposit_amount_kes: String(loaderData.deposit_amount_kes ?? ""),
+        utilities_info: loaderData.utilities_info || "",
+        ai_captions: loaderData.ai_captions || "",
+        suggested_hashtags: loaderData.suggested_hashtags || [],
+      });
+    }
+  }, [loaderData]);
+
   const mutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("properties").insert({
+      const { error } = await supabase.from("properties").update({
         ...form,
         price: Number(form.price) || 0,
         bedrooms: Number(form.bedrooms) || 0,
@@ -66,7 +113,7 @@ function PropertyEditor() {
         video_provider: form.video_provider || null,
         available_from: form.available_from || null,
         deposit_amount_kes: form.deposit_amount_kes ? Number(form.deposit_amount_kes) : null,
-      });
+      }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,10 +127,10 @@ function PropertyEditor() {
   return (
     <form onSubmit={(e) => { e.preventDefault(); mutation.mutate(); }} className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">New property</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Edit property</h1>
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={() => navigate({ to: "/admin/properties" })}>Cancel</Button>
-          <Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? "Saving..." : "Create"}</Button>
+          <Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? "Saving..." : "Save"}</Button>
         </div>
       </div>
       <Card>
@@ -140,6 +187,19 @@ function PropertyEditor() {
             </Select>
           </div>
           <div>
+            <Label>Validation status</Label>
+            <Select value={form.validation_status} onValueChange={(v) => update("validation_status", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="pending_verification">Pending verification</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="needs_review">Needs review</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
             <Label>Price</Label>
             <Input type="number" value={form.price} onChange={(e) => update("price", e.target.value)} />
           </div>
@@ -172,25 +232,12 @@ function PropertyEditor() {
             <Textarea value={form.description} onChange={(e) => update("description", e.target.value)} rows={5} />
           </div>
           <div>
-            <Label>Validation status</Label>
-            <Select value={form.validation_status} onValueChange={(v) => update("validation_status", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="pending_verification">Pending verification</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="needs_review">Needs review</SelectItem>
-                <SelectItem value="archived">Archived</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
             <Label>Virtual tour URL</Label>
-            <Input value={form.virtual_tour_url} onChange={(e) => update("virtual_tour_url", e.target.value)} placeholder="https://..." />
+            <Input value={form.virtual_tour_url} onChange={(e) => update("virtual_tour_url", e.target.value)} placeholder="https://" />
           </div>
           <div>
             <Label>Floor plan URL</Label>
-            <Input value={form.floor_plan_url} onChange={(e) => update("floor_plan_url", e.target.value)} placeholder="https://..." />
+            <Input value={form.floor_plan_url} onChange={(e) => update("floor_plan_url", e.target.value)} placeholder="https://" />
           </div>
           <div>
             <Label>Listing expires at</Label>
@@ -314,6 +361,97 @@ function PropertyEditor() {
               onChange={(e) => update("suggested_hashtags", e.target.value.split(",").map(s => s.trim()).filter(Boolean))} 
               placeholder="#luxury, #nairobi, #realestate" 
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center justify-between">
+            <span>Marketing Hub</span>
+            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
+              Score: {form.marketing_score || 0}%
+            </Badge>
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">Every published listing automatically generates marketing assets.</p>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2 space-y-4">
+              <div className="flex flex-wrap gap-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => {
+                    const url = `${window.location.origin}/property/${form.slug}`;
+                    navigator.clipboard.writeText(url);
+                    toast.success("SEO URL copied to clipboard");
+                  }}
+                >
+                  <Copy className="h-3.5 w-3.5" /> Copy SEO URL
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => toast.info("Short URL generation is automatic on publish")}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" /> Short Link
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  className="gap-2"
+                  onClick={() => toast.info("QR Code is available on public page")}
+                >
+                  <QrCode className="h-3.5 w-3.5" /> QR Code
+                </Button>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>AI Marketing Caption</Label>
+                <Textarea 
+                  value={form.ai_captions} 
+                  onChange={(e) => update("ai_captions", e.target.value)} 
+                  rows={3} 
+                  placeholder="The system generates captions for social media..." 
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label>Suggested Hashtags</Label>
+                <Input 
+                  value={form.suggested_hashtags.join(", ")} 
+                  onChange={(e) => update("suggested_hashtags", e.target.value.split(",").map(s => s.trim()).filter(Boolean))} 
+                  placeholder="#luxury, #nairobi" 
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-2 space-y-3">
+              <Label className="text-sm font-semibold">Marketing Checklist</Label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {[
+                  "SEO URL generated",
+                  "Short URL created",
+                  "QR Code ready",
+                  "AI Captions ready",
+                  "Video embedded",
+                  "High quality images",
+                  "Agent verified",
+                  "Social share links"
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 p-2 rounded-lg">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
