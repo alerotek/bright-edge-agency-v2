@@ -1407,32 +1407,6 @@ CREATE POLICY "LS agent read own" ON public.lead_sources FOR SELECT TO authentic
     agent_id IN (SELECT id FROM public.agents WHERE user_id = auth.uid())
   );
 
--- VIEWS — public_property_view, public_agent_view
-CREATE OR REPLACE VIEW public.public_property_view AS
-SELECT
-  p.id, p.slug, p.title, p.excerpt, p.meta_description,
-  p.price, p.currency, p.price_period,
-  p.listing_type, p.publish_status, p.validation_status, p.featured,
-  p.bedrooms, p.bathrooms, p.area_sqft, p.year_built, p.parking,
-  p.address, p.country, p.county, p.town, p.neighbourhood, p.landmark,
-  p.video_url, p.video_provider,
-  p.house_hunting_fee_kes, p.viewing_fee_kes, p.fees_refundable, p.fee_payment_timing,
-  p.promoted_until, p.listing_expires_at, p.created_at, p.published_at, p.updated_at,
-  p.agent_id, p.location_id, p.property_type_id, p.status_id, p.category_id,
-  p.virtual_tour_url, p.floor_plan_url
-FROM public.properties p
-WHERE p.publish_status = 'published';
-
-CREATE OR REPLACE VIEW public.public_agent_view AS
-SELECT
-  a.id, a.slug, a.full_name, a.photo, a.bio, a.team_name, a.specializations,
-  a.email, a.phone, a.whatsapp, a.license_number, a.verification_status,
-  a.verification_level, a.public_badge, a.active, a.display_order,
-  a.socials
-FROM public.agents a
-WHERE a.active = true
-  AND a.verification_status = 'verified';
-
 -- RLS: drop commission fields from anonymous reads of properties
 DO $$
 BEGIN
@@ -1575,19 +1549,6 @@ CREATE POLICY "POL self read" ON public.property_owner_links FOR SELECT TO authe
 DROP POLICY IF EXISTS "POL staff read" ON public.property_owner_links;
 CREATE POLICY "POL staff read" ON public.property_owner_links FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
-
--- Owner can read leads for their own properties
-CREATE OR REPLACE VIEW public.owner_inquiries_view AS
-SELECT i.*
-FROM public.inquiries i
-WHERE EXISTS (
-  SELECT 1
-  FROM public.property_owner_links pol
-  JOIN public.property_owners po ON po.id = pol.owner_id
-  WHERE pol.property_id = i.property_id
-    AND po.user_id = auth.uid()
-);
-GRANT SELECT ON public.owner_inquiries_view TO authenticated;
 
 -- Per-IP click dedup on short_links
 CREATE TABLE IF NOT EXISTS public.short_link_clicks (
@@ -1841,3 +1802,27 @@ SELECT
   p.available_from, p.furnished_status, p.lease_period, p.deposit_amount_kes, p.utilities_info
 FROM public.properties p
 WHERE p.publish_status = 'published';
+
+-- Create public_agent_view after all ALTER TABLE operations
+CREATE OR REPLACE VIEW public.public_agent_view AS
+SELECT
+  a.id, a.slug, a.full_name, a.photo, a.bio, a.team_name, a.specializations,
+  a.email, a.phone, a.whatsapp, a.license_number, a.verification_status,
+  a.verification_level, a.public_badge, a.active, a.display_order,
+  a.socials
+FROM public.agents a
+WHERE a.active = true
+  AND a.verification_status = 'verified';
+
+-- Create owner_inquiries_view after all ALTER TABLE operations
+CREATE OR REPLACE VIEW public.owner_inquiries_view AS
+SELECT i.*
+FROM public.inquiries i
+WHERE EXISTS (
+  SELECT 1
+  FROM public.property_owner_links pol
+  JOIN public.property_owners po ON po.id = pol.owner_id
+  WHERE pol.property_id = i.property_id
+    AND po.user_id = auth.uid()
+);
+GRANT SELECT ON public.owner_inquiries_view TO authenticated;
