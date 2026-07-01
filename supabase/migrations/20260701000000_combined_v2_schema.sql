@@ -1574,7 +1574,8 @@ ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "PJ public read" ON public.projects;
 CREATE POLICY "PJ public read" ON public.projects FOR SELECT USING (true);
 
-DROP POLICY IF EXISTS "PJ staff manage" ON public.projects FOR ALL TO authenticated
+DROP POLICY IF EXISTS "PJ staff manage" ON public.projects;
+CREATE POLICY "PJ staff manage" ON public.projects FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
