@@ -13,13 +13,31 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- ============================================================
 -- ENUMS
 -- ============================================================
-CREATE TYPE public.app_role AS ENUM ('super_admin','admin','editor','agent','user');
-CREATE TYPE public.property_listing_type AS ENUM ('sale','rent');
-CREATE TYPE public.property_publish_status AS ENUM ('draft','published','archived');
-CREATE TYPE public.lead_status AS ENUM ('new','contacted','qualified','viewing_scheduled','offer_made','won','lost','closed');
-CREATE TYPE public.lead_source AS ENUM ('website_form','property_inquiry','contact_page','whatsapp','newsletter','referral','other');
-CREATE TYPE public.blog_post_status AS ENUM ('draft','published','scheduled');
-CREATE TYPE public.review_status AS ENUM ('draft','published');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'app_role') THEN
+    CREATE TYPE public.app_role AS ENUM ('super_admin','admin','editor','agent','user');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'property_listing_type') THEN
+    CREATE TYPE public.property_listing_type AS ENUM ('sale','rent');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'property_publish_status') THEN
+    CREATE TYPE public.property_publish_status AS ENUM ('draft','published','archived');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lead_status') THEN
+    CREATE TYPE public.lead_status AS ENUM ('new','contacted','qualified','viewing_scheduled','offer_made','won','lost','closed');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'lead_source') THEN
+    CREATE TYPE public.lead_source AS ENUM ('website_form','property_inquiry','contact_page','whatsapp','newsletter','referral','other');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'blog_post_status') THEN
+    CREATE TYPE public.blog_post_status AS ENUM ('draft','published','scheduled');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'review_status') THEN
+    CREATE TYPE public.review_status AS ENUM ('draft','published');
+  END IF;
+END
+$$;
 
 -- ============================================================
 -- UTILITY: updated_at trigger
