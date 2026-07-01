@@ -1134,7 +1134,7 @@ BEGIN
 
   IF TG_OP = 'UPDATE' THEN
     -- status transitions
-    IF COALESCE(OLD.publish_status,'') <> NEW.publish_status THEN
+    IF OLD.publish_status IS DISTINCT FROM NEW.publish_status THEN
       IF OLD.publish_status = 'published' AND NEW.publish_status <> 'published' AND NEW.agent_id IS NOT NULL THEN
         UPDATE public.agents
           SET published_listing_count = GREATEST(0, published_listing_count - 1)
@@ -1598,7 +1598,7 @@ CREATE TABLE IF NOT EXISTS public.short_link_clicks (
   utm_campaign text,
   country text,
   created_at timestamptz NOT NULL DEFAULT now(),
-  created_date date GENERATED ALWAYS AS (created_at::date) STORED
+  created_date date GENERATED ALWAYS AS ((created_at AT TIME ZONE 'UTC')::date) STORED
 );
 -- Uniqueness per (link, ip_hash, day) prevents double counting.
 CREATE UNIQUE INDEX IF NOT EXISTS uq_short_link_clicks_per_day
