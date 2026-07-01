@@ -312,7 +312,7 @@ ON CONFLICT DO NOTHING;
 INSERT INTO public.agent_documents (agent_id, kind, storage_path, public_url, mime_type, byte_size, review_status)
 SELECT
   (SELECT id FROM public.agents WHERE slug = 'amina-mwangi'),
-  kind::agent_document_kind, storage_path, public_url, mime_type, byte_size, review_status
+  kind::agent_document_kind, storage_path, public_url, mime_type, byte_size, review_status::text
 FROM (VALUES
   ('national_id_front', 'docs/amina-id-front.jpg', 'https://storage.brightedge.co.ke/docs/amina-id-front.jpg', 'image/jpeg', 150000, 'approved'),
   ('national_id_back', 'docs/amina-id-back.jpg', 'https://storage.brightedge.co.ke/docs/amina-id-back.jpg', 'image/jpeg', 145000, 'approved'),
