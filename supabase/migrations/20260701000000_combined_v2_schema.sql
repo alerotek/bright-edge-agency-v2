@@ -57,7 +57,7 @@ $$;
 -- ============================================================
 -- PROFILES (one row per auth.users)
 -- ============================================================
-CREATE TABLE public.profiles (
+CREATE TABLE IF NOT EXISTS public.profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name text,
   avatar_url text,
@@ -74,6 +74,7 @@ CREATE POLICY "Users can update own profile" ON public.profiles
   FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can insert own profile" ON public.profiles
   FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
+DROP TRIGGER IF EXISTS trg_profiles_updated ON public.profiles;
 CREATE TRIGGER trg_profiles_updated BEFORE UPDATE ON public.profiles
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
@@ -97,7 +98,7 @@ END;$$;
 -- ============================================================
 -- ROLES
 -- ============================================================
-CREATE TABLE public.user_roles (
+CREATE TABLE IF NOT EXISTS public.user_roles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   role app_role NOT NULL,
@@ -134,7 +135,7 @@ CREATE TRIGGER on_auth_user_created
 -- ============================================================
 -- LOCATIONS
 -- ============================================================
-CREATE TABLE public.locations (
+CREATE TABLE IF NOT EXISTS public.locations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   slug text NOT NULL UNIQUE,
@@ -153,13 +154,14 @@ CREATE POLICY "Locations public read" ON public.locations FOR SELECT USING (true
 CREATE POLICY "Locations editors manage" ON public.locations FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP TRIGGER IF EXISTS trg_locations_updated ON public.locations;
 CREATE TRIGGER trg_locations_updated BEFORE UPDATE ON public.locations
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- ============================================================
 -- PROPERTY CATEGORIES / TYPES / STATUSES / AMENITIES
 -- ============================================================
-CREATE TABLE public.property_categories (
+CREATE TABLE IF NOT EXISTS public.property_categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   slug text NOT NULL UNIQUE,
@@ -174,7 +176,7 @@ CREATE POLICY "PC editors manage" ON public.property_categories FOR ALL TO authe
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.property_types (
+CREATE TABLE IF NOT EXISTS public.property_types (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   slug text NOT NULL UNIQUE
@@ -188,7 +190,7 @@ CREATE POLICY "PT editors manage" ON public.property_types FOR ALL TO authentica
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.property_statuses (
+CREATE TABLE IF NOT EXISTS public.property_statuses (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   slug text NOT NULL UNIQUE,
@@ -203,7 +205,7 @@ CREATE POLICY "PS editors manage" ON public.property_statuses FOR ALL TO authent
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.amenities (
+CREATE TABLE IF NOT EXISTS public.amenities (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   slug text NOT NULL UNIQUE,
@@ -221,7 +223,7 @@ CREATE POLICY "Am editors manage" ON public.amenities FOR ALL TO authenticated
 -- ============================================================
 -- AGENTS
 -- ============================================================
-CREATE TABLE public.agents (
+CREATE TABLE IF NOT EXISTS public.agents (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   full_name text NOT NULL,
@@ -248,13 +250,14 @@ CREATE POLICY "Agents staff full read" ON public.agents FOR SELECT TO authentica
 CREATE POLICY "Agents editors manage" ON public.agents FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP TRIGGER IF EXISTS trg_agents_updated ON public.agents;
 CREATE TRIGGER trg_agents_updated BEFORE UPDATE ON public.agents
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- ============================================================
 -- PROPERTIES
 -- ============================================================
-CREATE TABLE public.properties (
+CREATE TABLE IF NOT EXISTS public.properties (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   slug text NOT NULL UNIQUE,
@@ -287,11 +290,11 @@ CREATE TABLE public.properties (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_properties_publish_status ON public.properties(publish_status);
-CREATE INDEX idx_properties_featured ON public.properties(featured) WHERE featured = true;
-CREATE INDEX idx_properties_location ON public.properties(location_id);
-CREATE INDEX idx_properties_type ON public.properties(property_type_id);
-CREATE INDEX idx_properties_listing_type ON public.properties(listing_type);
+CREATE INDEX IF NOT EXISTS idx_properties_publish_status ON public.properties(publish_status);
+CREATE INDEX IF NOT EXISTS idx_properties_featured ON public.properties(featured) WHERE featured = true;
+CREATE INDEX IF NOT EXISTS idx_properties_location ON public.properties(location_id);
+CREATE INDEX IF NOT EXISTS idx_properties_type ON public.properties(property_type_id);
+CREATE INDEX IF NOT EXISTS idx_properties_listing_type ON public.properties(listing_type);
 GRANT SELECT ON public.properties TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.properties TO authenticated;
 GRANT ALL ON public.properties TO service_role;
@@ -304,13 +307,14 @@ CREATE POLICY "Properties staff read all" ON public.properties
 CREATE POLICY "Properties editors manage" ON public.properties FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP TRIGGER IF EXISTS trg_properties_updated ON public.properties;
 CREATE TRIGGER trg_properties_updated BEFORE UPDATE ON public.properties
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- ============================================================
 -- PROPERTY IMAGES / DOCS / VIDEOS
 -- ============================================================
-CREATE TABLE public.property_images (
+CREATE TABLE IF NOT EXISTS public.property_images (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
   image_url text NOT NULL,
@@ -319,7 +323,7 @@ CREATE TABLE public.property_images (
   is_featured boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_property_images_property ON public.property_images(property_id, image_order);
+CREATE INDEX IF NOT EXISTS idx_property_images_property ON public.property_images(property_id, image_order);
 GRANT SELECT ON public.property_images TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_images TO authenticated;
 GRANT ALL ON public.property_images TO service_role;
@@ -332,7 +336,7 @@ CREATE POLICY "PI editors manage" ON public.property_images FOR ALL TO authentic
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.property_documents (
+CREATE TABLE IF NOT EXISTS public.property_documents (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
   name text NOT NULL,
@@ -346,7 +350,7 @@ CREATE POLICY "Docs staff" ON public.property_documents FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
 
-CREATE TABLE public.property_videos (
+CREATE TABLE IF NOT EXISTS public.property_videos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
   video_url text NOT NULL,
@@ -363,7 +367,7 @@ CREATE POLICY "PV editors manage" ON public.property_videos FOR ALL TO authentic
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.property_amenities (
+CREATE TABLE IF NOT EXISTS public.property_amenities (
   property_id uuid NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
   amenity_id uuid NOT NULL REFERENCES public.amenities(id) ON DELETE CASCADE,
   PRIMARY KEY (property_id, amenity_id)
@@ -394,6 +398,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;$$;
+DROP TRIGGER IF EXISTS trg_property_publish_guard ON public.properties;
 CREATE TRIGGER trg_property_publish_guard
   BEFORE INSERT OR UPDATE OF publish_status ON public.properties
   FOR EACH ROW EXECUTE FUNCTION public.enforce_property_min_images();
@@ -401,7 +406,7 @@ CREATE TRIGGER trg_property_publish_guard
 -- ============================================================
 -- INQUIRIES (CRM)
 -- ============================================================
-CREATE TABLE public.inquiries (
+CREATE TABLE IF NOT EXISTS public.inquiries (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid REFERENCES public.properties(id) ON DELETE SET NULL,
   agent_id uuid REFERENCES public.agents(id) ON DELETE SET NULL,
@@ -417,8 +422,8 @@ CREATE TABLE public.inquiries (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_inquiries_status ON public.inquiries(status);
-CREATE INDEX idx_inquiries_created ON public.inquiries(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_inquiries_status ON public.inquiries(status);
+CREATE INDEX IF NOT EXISTS idx_inquiries_created ON public.inquiries(created_at DESC);
 GRANT INSERT ON public.inquiries TO anon, authenticated;
 GRANT SELECT,UPDATE,DELETE ON public.inquiries TO authenticated;
 GRANT ALL ON public.inquiries TO service_role;
@@ -431,10 +436,11 @@ CREATE POLICY "Inquiries staff update" ON public.inquiries FOR UPDATE TO authent
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
 CREATE POLICY "Inquiries admins delete" ON public.inquiries FOR DELETE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+DROP TRIGGER IF EXISTS trg_inquiries_updated ON public.inquiries;
 CREATE TRIGGER trg_inquiries_updated BEFORE UPDATE ON public.inquiries
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
-CREATE TABLE public.lead_activities (
+CREATE TABLE IF NOT EXISTS public.lead_activities (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   inquiry_id uuid NOT NULL REFERENCES public.inquiries(id) ON DELETE CASCADE,
   actor_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -444,7 +450,7 @@ CREATE TABLE public.lead_activities (
   note text,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_lead_activities_inquiry ON public.lead_activities(inquiry_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_lead_activities_inquiry ON public.lead_activities(inquiry_id, created_at DESC);
 GRANT SELECT, INSERT ON public.lead_activities TO authenticated;
 GRANT ALL ON public.lead_activities TO service_role;
 ALTER TABLE public.lead_activities ENABLE ROW LEVEL SECURITY;
@@ -453,7 +459,7 @@ CREATE POLICY "LA staff read" ON public.lead_activities FOR SELECT TO authentica
 CREATE POLICY "LA staff insert" ON public.lead_activities FOR INSERT TO authenticated
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
 
-CREATE TABLE public.contact_requests (
+CREATE TABLE IF NOT EXISTS public.contact_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   full_name text NOT NULL,
   email text NOT NULL,
@@ -477,7 +483,7 @@ CREATE POLICY "CR staff update" ON public.contact_requests FOR UPDATE TO authent
 -- ============================================================
 -- BLOG
 -- ============================================================
-CREATE TABLE public.blog_categories (
+CREATE TABLE IF NOT EXISTS public.blog_categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   slug text NOT NULL UNIQUE,
@@ -492,7 +498,7 @@ CREATE POLICY "BC editors manage" ON public.blog_categories FOR ALL TO authentic
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.blog_tags (
+CREATE TABLE IF NOT EXISTS public.blog_tags (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL UNIQUE,
   slug text NOT NULL UNIQUE
@@ -506,7 +512,7 @@ CREATE POLICY "BT editors manage" ON public.blog_tags FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.blog_posts (
+CREATE TABLE IF NOT EXISTS public.blog_posts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   title text NOT NULL,
   slug text NOT NULL UNIQUE,
@@ -525,8 +531,8 @@ CREATE TABLE public.blog_posts (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_blog_posts_status ON public.blog_posts(status);
-CREATE INDEX idx_blog_posts_published_at ON public.blog_posts(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON public.blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON public.blog_posts(published_at DESC);
 GRANT SELECT ON public.blog_posts TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.blog_posts TO authenticated;
 GRANT ALL ON public.blog_posts TO service_role;
@@ -538,10 +544,11 @@ CREATE POLICY "BP staff read all" ON public.blog_posts FOR SELECT TO authenticat
 CREATE POLICY "BP editors manage" ON public.blog_posts FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP TRIGGER IF EXISTS trg_blog_posts_updated ON public.blog_posts;
 CREATE TRIGGER trg_blog_posts_updated BEFORE UPDATE ON public.blog_posts
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
-CREATE TABLE public.blog_post_tags (
+CREATE TABLE IF NOT EXISTS public.blog_post_tags (
   post_id uuid NOT NULL REFERENCES public.blog_posts(id) ON DELETE CASCADE,
   tag_id uuid NOT NULL REFERENCES public.blog_tags(id) ON DELETE CASCADE,
   PRIMARY KEY (post_id, tag_id)
@@ -555,7 +562,7 @@ CREATE POLICY "BPT editors manage" ON public.blog_post_tags FOR ALL TO authentic
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.comments (
+CREATE TABLE IF NOT EXISTS public.comments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   post_id uuid REFERENCES public.blog_posts(id) ON DELETE CASCADE,
   review_id uuid,
@@ -578,7 +585,7 @@ CREATE POLICY "Comments staff manage" ON public.comments FOR ALL TO authenticate
 -- ============================================================
 -- PROPERTY REVIEWS (dedicated content type)
 -- ============================================================
-CREATE TABLE public.property_reviews (
+CREATE TABLE IF NOT EXISTS public.property_reviews (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid REFERENCES public.properties(id) ON DELETE SET NULL,
   location_id uuid REFERENCES public.locations(id) ON DELETE SET NULL,
@@ -597,7 +604,7 @@ CREATE TABLE public.property_reviews (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_reviews_status ON public.property_reviews(status);
+CREATE INDEX IF NOT EXISTS idx_reviews_status ON public.property_reviews(status);
 GRANT SELECT ON public.property_reviews TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_reviews TO authenticated;
 GRANT ALL ON public.property_reviews TO service_role;
@@ -609,13 +616,14 @@ CREATE POLICY "PR staff read all" ON public.property_reviews FOR SELECT TO authe
 CREATE POLICY "PR editors manage" ON public.property_reviews FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP TRIGGER IF EXISTS trg_reviews_updated ON public.property_reviews;
 CREATE TRIGGER trg_reviews_updated BEFORE UPDATE ON public.property_reviews
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- ============================================================
 -- TESTIMONIALS, NEWSLETTER, SAVED, FEATURED, ACTIVITY, SETTINGS
 -- ============================================================
-CREATE TABLE public.testimonials (
+CREATE TABLE IF NOT EXISTS public.testimonials (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   author_name text NOT NULL,
   author_title text,
@@ -636,7 +644,7 @@ CREATE POLICY "T editors manage" ON public.testimonials FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.newsletter_subscribers (
+CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   email text NOT NULL UNIQUE,
   full_name text,
@@ -656,7 +664,7 @@ CREATE POLICY "NS admins manage" ON public.newsletter_subscribers FOR UPDATE TO 
 CREATE POLICY "NS admins delete" ON public.newsletter_subscribers FOR DELETE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
 
-CREATE TABLE public.saved_properties (
+CREATE TABLE IF NOT EXISTS public.saved_properties (
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   property_id uuid NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
   created_at timestamptz NOT NULL DEFAULT now(),
@@ -668,7 +676,7 @@ ALTER TABLE public.saved_properties ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Saved own" ON public.saved_properties FOR ALL TO authenticated
   USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
-CREATE TABLE public.featured_properties (
+CREATE TABLE IF NOT EXISTS public.featured_properties (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
   display_order int NOT NULL DEFAULT 0,
@@ -683,7 +691,7 @@ CREATE POLICY "FP editors manage" ON public.featured_properties FOR ALL TO authe
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
-CREATE TABLE public.activity_logs (
+CREATE TABLE IF NOT EXISTS public.activity_logs (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   actor_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   action text NOT NULL,
@@ -692,7 +700,7 @@ CREATE TABLE public.activity_logs (
   metadata jsonb DEFAULT '{}'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_activity_logs_created ON public.activity_logs(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_created ON public.activity_logs(created_at DESC);
 GRANT SELECT, INSERT ON public.activity_logs TO authenticated;
 GRANT ALL ON public.activity_logs TO service_role;
 ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
@@ -701,7 +709,7 @@ CREATE POLICY "AL staff read" ON public.activity_logs FOR SELECT TO authenticate
 CREATE POLICY "AL staff insert" ON public.activity_logs FOR INSERT TO authenticated
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
 
-CREATE TABLE public.settings (
+CREATE TABLE IF NOT EXISTS public.settings (
   id int PRIMARY KEY DEFAULT 1,
   company_name text NOT NULL DEFAULT 'Bright Edge Agency',
   tagline text DEFAULT 'Connecting You To Exceptional Spaces',
@@ -727,6 +735,7 @@ CREATE POLICY "S public read" ON public.settings FOR SELECT USING (true);
 CREATE POLICY "S admins manage" ON public.settings FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+DROP TRIGGER IF EXISTS trg_settings_updated ON public.settings;
 CREATE TRIGGER trg_settings_updated BEFORE UPDATE ON public.settings
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
@@ -822,7 +831,7 @@ ALTER TABLE public.settings ADD COLUMN IF NOT EXISTS commission_enabled boolean 
 ALTER TABLE public.settings ADD COLUMN IF NOT EXISTS stripe_connect_enabled boolean NOT NULL DEFAULT false;
 
 -- NEW TABLE: AGENT_VERIFICATIONS
-CREATE TABLE public.agent_verifications (
+CREATE TABLE IF NOT EXISTS public.agent_verifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   agent_id uuid NOT NULL REFERENCES public.agents(id) ON DELETE CASCADE,
   status agent_verification_status NOT NULL DEFAULT 'pending',
@@ -834,8 +843,8 @@ CREATE TABLE public.agent_verifications (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_agent_verifications_agent ON public.agent_verifications(agent_id);
-CREATE INDEX idx_agent_verifications_status ON public.agent_verifications(status);
+CREATE INDEX IF NOT EXISTS idx_agent_verifications_agent ON public.agent_verifications(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_verifications_status ON public.agent_verifications(status);
 GRANT SELECT, INSERT, UPDATE ON public.agent_verifications TO authenticated;
 GRANT ALL ON public.agent_verifications TO service_role;
 ALTER TABLE public.agent_verifications ENABLE ROW LEVEL SECURITY;
@@ -846,11 +855,12 @@ CREATE POLICY "AV agents insert own" ON public.agent_verifications FOR INSERT TO
 CREATE POLICY "AV admins manage" ON public.agent_verifications FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+DROP TRIGGER IF EXISTS trg_agent_verifications_updated ON public.agent_verifications;
 CREATE TRIGGER trg_agent_verifications_updated BEFORE UPDATE ON public.agent_verifications
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- NEW TABLE: MARKETING_ASSETS
-CREATE TABLE public.marketing_assets (
+CREATE TABLE IF NOT EXISTS public.marketing_assets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid REFERENCES public.properties(id) ON DELETE CASCADE,
   agent_id uuid REFERENCES public.agents(id) ON DELETE CASCADE,
@@ -865,8 +875,8 @@ CREATE TABLE public.marketing_assets (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_marketing_assets_property ON public.marketing_assets(property_id);
-CREATE INDEX idx_marketing_assets_agent ON public.marketing_assets(agent_id);
+CREATE INDEX IF NOT EXISTS idx_marketing_assets_property ON public.marketing_assets(property_id);
+CREATE INDEX IF NOT EXISTS idx_marketing_assets_agent ON public.marketing_assets(agent_id);
 GRANT SELECT ON public.marketing_assets TO anon, authenticated;
 GRANT INSERT, UPDATE ON public.marketing_assets TO authenticated;
 GRANT ALL ON public.marketing_assets TO service_role;
@@ -875,11 +885,12 @@ CREATE POLICY "MA public read" ON public.marketing_assets FOR SELECT USING (true
 CREATE POLICY "MA editors manage" ON public.marketing_assets FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP TRIGGER IF EXISTS trg_marketing_assets_updated ON public.marketing_assets;
 CREATE TRIGGER trg_marketing_assets_updated BEFORE UPDATE ON public.marketing_assets
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- NEW TABLE: SOCIAL_VIDEOS
-CREATE TABLE public.social_videos (
+CREATE TABLE IF NOT EXISTS public.social_videos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid REFERENCES public.properties(id) ON DELETE CASCADE,
   agent_id uuid REFERENCES public.agents(id) ON DELETE CASCADE,
@@ -893,8 +904,8 @@ CREATE TABLE public.social_videos (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_social_videos_property ON public.social_videos(property_id);
-CREATE INDEX idx_social_videos_agent ON public.social_videos(agent_id);
+CREATE INDEX IF NOT EXISTS idx_social_videos_property ON public.social_videos(property_id);
+CREATE INDEX IF NOT EXISTS idx_social_videos_agent ON public.social_videos(agent_id);
 GRANT SELECT ON public.social_videos TO anon, authenticated;
 GRANT INSERT, UPDATE ON public.social_videos TO authenticated;
 GRANT ALL ON public.social_videos TO service_role;
@@ -906,11 +917,12 @@ CREATE POLICY "SV staff read all" ON public.social_videos FOR SELECT TO authenti
 CREATE POLICY "SV editors manage" ON public.social_videos FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP TRIGGER IF EXISTS trg_social_videos_updated ON public.social_videos;
 CREATE TRIGGER trg_social_videos_updated BEFORE UPDATE ON public.social_videos
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- NEW TABLE: REFERRAL_PARTNERS
-CREATE TABLE public.referral_partners (
+CREATE TABLE IF NOT EXISTS public.referral_partners (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name text NOT NULL,
   email text NOT NULL,
@@ -922,7 +934,7 @@ CREATE TABLE public.referral_partners (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_referral_partners_agency ON public.referral_partners(agency_id);
+CREATE INDEX IF NOT EXISTS idx_referral_partners_agency ON public.referral_partners(agency_id);
 GRANT SELECT ON public.referral_partners TO anon, authenticated;
 GRANT INSERT, UPDATE ON public.referral_partners TO authenticated;
 GRANT ALL ON public.referral_partners TO service_role;
@@ -931,11 +943,12 @@ CREATE POLICY "RP public read active" ON public.referral_partners FOR SELECT USI
 CREATE POLICY "RP editors manage" ON public.referral_partners FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP TRIGGER IF EXISTS trg_referral_partners_updated ON public.referral_partners;
 CREATE TRIGGER trg_referral_partners_updated BEFORE UPDATE ON public.referral_partners
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- NEW TABLE: SUBSCRIPTIONS (SaaS)
-CREATE TABLE public.subscriptions (
+CREATE TABLE IF NOT EXISTS public.subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   agency_id uuid,
   plan text NOT NULL DEFAULT 'starter',
@@ -948,8 +961,8 @@ CREATE TABLE public.subscriptions (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_subscriptions_agency ON public.subscriptions(agency_id);
-CREATE INDEX idx_subscriptions_status ON public.subscriptions(status);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_agency ON public.subscriptions(agency_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON public.subscriptions(status);
 GRANT SELECT ON public.subscriptions TO authenticated;
 GRANT ALL ON public.subscriptions TO service_role;
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
@@ -958,6 +971,7 @@ CREATE POLICY "Sub staff read" ON public.subscriptions FOR SELECT TO authenticat
 CREATE POLICY "Sub admins manage" ON public.subscriptions FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+DROP TRIGGER IF EXISTS trg_subscriptions_updated ON public.subscriptions;
 CREATE TRIGGER trg_subscriptions_updated BEFORE UPDATE ON public.subscriptions
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
@@ -1597,6 +1611,7 @@ CREATE POLICY "PJ staff manage" ON public.projects FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
+DROP TRIGGER IF EXISTS trg_projects_updated ON public.projects;
 CREATE TRIGGER trg_projects_updated BEFORE UPDATE ON public.projects
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
