@@ -68,10 +68,13 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
 GRANT ALL ON public.profiles TO service_role;
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Profiles readable by authenticated" ON public.profiles;
 CREATE POLICY "Profiles readable by authenticated" ON public.profiles
   FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 CREATE POLICY "Users can update own profile" ON public.profiles
   FOR UPDATE TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.profiles;
 CREATE POLICY "Users can insert own profile" ON public.profiles
   FOR INSERT TO authenticated WITH CHECK (auth.uid() = id);
 DROP TRIGGER IF EXISTS trg_profiles_updated ON public.profiles;
@@ -119,8 +122,10 @@ RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS
   SELECT EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = ANY(_roles));
 $$;
 
+DROP POLICY IF EXISTS "Users see own roles" ON public.user_roles;
 CREATE POLICY "Users see own roles" ON public.user_roles
   FOR SELECT TO authenticated USING (user_id = auth.uid());
+DROP POLICY IF EXISTS "Admins manage roles" ON public.user_roles;
 CREATE POLICY "Admins manage roles" ON public.user_roles
   FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
@@ -150,7 +155,9 @@ GRANT SELECT ON public.locations TO anon, authenticated;
 GRANT INSERT, UPDATE, DELETE ON public.locations TO authenticated;
 GRANT ALL ON public.locations TO service_role;
 ALTER TABLE public.locations ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Locations public read" ON public.locations;
 CREATE POLICY "Locations public read" ON public.locations FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Locations editors manage" ON public.locations;
 CREATE POLICY "Locations editors manage" ON public.locations FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -171,7 +178,9 @@ GRANT SELECT ON public.property_categories TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_categories TO authenticated;
 GRANT ALL ON public.property_categories TO service_role;
 ALTER TABLE public.property_categories ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "PC public read" ON public.property_categories;
 CREATE POLICY "PC public read" ON public.property_categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "PC editors manage" ON public.property_categories;
 CREATE POLICY "PC editors manage" ON public.property_categories FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -185,7 +194,9 @@ GRANT SELECT ON public.property_types TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_types TO authenticated;
 GRANT ALL ON public.property_types TO service_role;
 ALTER TABLE public.property_types ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "PT public read" ON public.property_types;
 CREATE POLICY "PT public read" ON public.property_types FOR SELECT USING (true);
+DROP POLICY IF EXISTS "PT editors manage" ON public.property_types;
 CREATE POLICY "PT editors manage" ON public.property_types FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -200,7 +211,9 @@ GRANT SELECT ON public.property_statuses TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_statuses TO authenticated;
 GRANT ALL ON public.property_statuses TO service_role;
 ALTER TABLE public.property_statuses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "PS public read" ON public.property_statuses;
 CREATE POLICY "PS public read" ON public.property_statuses FOR SELECT USING (true);
+DROP POLICY IF EXISTS "PS editors manage" ON public.property_statuses;
 CREATE POLICY "PS editors manage" ON public.property_statuses FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -215,7 +228,9 @@ GRANT SELECT ON public.amenities TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.amenities TO authenticated;
 GRANT ALL ON public.amenities TO service_role;
 ALTER TABLE public.amenities ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Am public read" ON public.amenities;
 CREATE POLICY "Am public read" ON public.amenities FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Am editors manage" ON public.amenities;
 CREATE POLICY "Am editors manage" ON public.amenities FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -244,9 +259,12 @@ GRANT SELECT ON public.agents TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.agents TO authenticated;
 GRANT ALL ON public.agents TO service_role;
 ALTER TABLE public.agents ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Agents public read active" ON public.agents;
 CREATE POLICY "Agents public read active" ON public.agents FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "Agents staff full read" ON public.agents;
 CREATE POLICY "Agents staff full read" ON public.agents FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "Agents editors manage" ON public.agents;
 CREATE POLICY "Agents editors manage" ON public.agents FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -299,11 +317,14 @@ GRANT SELECT ON public.properties TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.properties TO authenticated;
 GRANT ALL ON public.properties TO service_role;
 ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Properties public read published" ON public.properties;
 CREATE POLICY "Properties public read published" ON public.properties
   FOR SELECT USING (publish_status = 'published');
+DROP POLICY IF EXISTS "Properties staff read all" ON public.properties;
 CREATE POLICY "Properties staff read all" ON public.properties
   FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "Properties editors manage" ON public.properties;
 CREATE POLICY "Properties editors manage" ON public.properties FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -328,10 +349,13 @@ GRANT SELECT ON public.property_images TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_images TO authenticated;
 GRANT ALL ON public.property_images TO service_role;
 ALTER TABLE public.property_images ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "PI public read for published" ON public.property_images;
 CREATE POLICY "PI public read for published" ON public.property_images FOR SELECT
   USING (EXISTS (SELECT 1 FROM public.properties p WHERE p.id = property_id AND p.publish_status='published'));
+DROP POLICY IF EXISTS "PI staff read" ON public.property_images;
 CREATE POLICY "PI staff read" ON public.property_images FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "PI editors manage" ON public.property_images;
 CREATE POLICY "PI editors manage" ON public.property_images FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -346,6 +370,7 @@ CREATE TABLE IF NOT EXISTS public.property_documents (
 GRANT SELECT,INSERT,UPDATE,DELETE ON public.property_documents TO authenticated;
 GRANT ALL ON public.property_documents TO service_role;
 ALTER TABLE public.property_documents ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Docs staff" ON public.property_documents;
 CREATE POLICY "Docs staff" ON public.property_documents FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
@@ -361,8 +386,10 @@ GRANT SELECT ON public.property_videos TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_videos TO authenticated;
 GRANT ALL ON public.property_videos TO service_role;
 ALTER TABLE public.property_videos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "PV public read for published" ON public.property_videos;
 CREATE POLICY "PV public read for published" ON public.property_videos FOR SELECT
   USING (EXISTS (SELECT 1 FROM public.properties p WHERE p.id = property_id AND p.publish_status='published'));
+DROP POLICY IF EXISTS "PV editors manage" ON public.property_videos;
 CREATE POLICY "PV editors manage" ON public.property_videos FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -376,7 +403,9 @@ GRANT SELECT ON public.property_amenities TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_amenities TO authenticated;
 GRANT ALL ON public.property_amenities TO service_role;
 ALTER TABLE public.property_amenities ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "PA public read" ON public.property_amenities;
 CREATE POLICY "PA public read" ON public.property_amenities FOR SELECT USING (true);
+DROP POLICY IF EXISTS "PA editors manage" ON public.property_amenities;
 CREATE POLICY "PA editors manage" ON public.property_amenities FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -428,12 +457,16 @@ GRANT INSERT ON public.inquiries TO anon, authenticated;
 GRANT SELECT,UPDATE,DELETE ON public.inquiries TO authenticated;
 GRANT ALL ON public.inquiries TO service_role;
 ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Inquiries anyone can create" ON public.inquiries;
 CREATE POLICY "Inquiries anyone can create" ON public.inquiries FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Inquiries staff read" ON public.inquiries;
 CREATE POLICY "Inquiries staff read" ON public.inquiries FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "Inquiries staff update" ON public.inquiries;
 CREATE POLICY "Inquiries staff update" ON public.inquiries FOR UPDATE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "Inquiries admins delete" ON public.inquiries;
 CREATE POLICY "Inquiries admins delete" ON public.inquiries FOR DELETE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
 DROP TRIGGER IF EXISTS trg_inquiries_updated ON public.inquiries;
@@ -454,8 +487,10 @@ CREATE INDEX IF NOT EXISTS idx_lead_activities_inquiry ON public.lead_activities
 GRANT SELECT, INSERT ON public.lead_activities TO authenticated;
 GRANT ALL ON public.lead_activities TO service_role;
 ALTER TABLE public.lead_activities ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "LA staff read" ON public.lead_activities;
 CREATE POLICY "LA staff read" ON public.lead_activities FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "LA staff insert" ON public.lead_activities;
 CREATE POLICY "LA staff insert" ON public.lead_activities FOR INSERT TO authenticated
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
 
@@ -473,9 +508,12 @@ GRANT INSERT ON public.contact_requests TO anon, authenticated;
 GRANT SELECT,UPDATE,DELETE ON public.contact_requests TO authenticated;
 GRANT ALL ON public.contact_requests TO service_role;
 ALTER TABLE public.contact_requests ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "CR anyone create" ON public.contact_requests;
 CREATE POLICY "CR anyone create" ON public.contact_requests FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "CR staff read" ON public.contact_requests;
 CREATE POLICY "CR staff read" ON public.contact_requests FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "CR staff update" ON public.contact_requests;
 CREATE POLICY "CR staff update" ON public.contact_requests FOR UPDATE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
@@ -493,7 +531,9 @@ GRANT SELECT ON public.blog_categories TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.blog_categories TO authenticated;
 GRANT ALL ON public.blog_categories TO service_role;
 ALTER TABLE public.blog_categories ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "BC public read" ON public.blog_categories;
 CREATE POLICY "BC public read" ON public.blog_categories FOR SELECT USING (true);
+DROP POLICY IF EXISTS "BC editors manage" ON public.blog_categories;
 CREATE POLICY "BC editors manage" ON public.blog_categories FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -507,7 +547,9 @@ GRANT SELECT ON public.blog_tags TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.blog_tags TO authenticated;
 GRANT ALL ON public.blog_tags TO service_role;
 ALTER TABLE public.blog_tags ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "BT public read" ON public.blog_tags;
 CREATE POLICY "BT public read" ON public.blog_tags FOR SELECT USING (true);
+DROP POLICY IF EXISTS "BT editors manage" ON public.blog_tags;
 CREATE POLICY "BT editors manage" ON public.blog_tags FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -537,10 +579,13 @@ GRANT SELECT ON public.blog_posts TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.blog_posts TO authenticated;
 GRANT ALL ON public.blog_posts TO service_role;
 ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "BP public read published" ON public.blog_posts;
 CREATE POLICY "BP public read published" ON public.blog_posts FOR SELECT
   USING (status = 'published' AND (published_at IS NULL OR published_at <= now()));
+DROP POLICY IF EXISTS "BP staff read all" ON public.blog_posts;
 CREATE POLICY "BP staff read all" ON public.blog_posts FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP POLICY IF EXISTS "BP editors manage" ON public.blog_posts;
 CREATE POLICY "BP editors manage" ON public.blog_posts FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -557,7 +602,9 @@ GRANT SELECT ON public.blog_post_tags TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.blog_post_tags TO authenticated;
 GRANT ALL ON public.blog_post_tags TO service_role;
 ALTER TABLE public.blog_post_tags ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "BPT public read" ON public.blog_post_tags;
 CREATE POLICY "BPT public read" ON public.blog_post_tags FOR SELECT USING (true);
+DROP POLICY IF EXISTS "BPT editors manage" ON public.blog_post_tags;
 CREATE POLICY "BPT editors manage" ON public.blog_post_tags FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -576,8 +623,11 @@ GRANT INSERT ON public.comments TO anon, authenticated;
 GRANT SELECT,UPDATE,DELETE ON public.comments TO authenticated;
 GRANT ALL ON public.comments TO service_role;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Comments public read approved" ON public.comments;
 CREATE POLICY "Comments public read approved" ON public.comments FOR SELECT USING (approved = true);
+DROP POLICY IF EXISTS "Comments anyone create" ON public.comments;
 CREATE POLICY "Comments anyone create" ON public.comments FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Comments staff manage" ON public.comments;
 CREATE POLICY "Comments staff manage" ON public.comments FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -609,10 +659,13 @@ GRANT SELECT ON public.property_reviews TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.property_reviews TO authenticated;
 GRANT ALL ON public.property_reviews TO service_role;
 ALTER TABLE public.property_reviews ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "PR public read published" ON public.property_reviews;
 CREATE POLICY "PR public read published" ON public.property_reviews FOR SELECT
   USING (status = 'published');
+DROP POLICY IF EXISTS "PR staff read all" ON public.property_reviews;
 CREATE POLICY "PR staff read all" ON public.property_reviews FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP POLICY IF EXISTS "PR editors manage" ON public.property_reviews;
 CREATE POLICY "PR editors manage" ON public.property_reviews FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -639,7 +692,9 @@ GRANT SELECT ON public.testimonials TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.testimonials TO authenticated;
 GRANT ALL ON public.testimonials TO service_role;
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "T public read published" ON public.testimonials;
 CREATE POLICY "T public read published" ON public.testimonials FOR SELECT USING (published = true);
+DROP POLICY IF EXISTS "T editors manage" ON public.testimonials;
 CREATE POLICY "T editors manage" ON public.testimonials FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -655,12 +710,16 @@ GRANT INSERT ON public.newsletter_subscribers TO anon, authenticated;
 GRANT SELECT,UPDATE,DELETE ON public.newsletter_subscribers TO authenticated;
 GRANT ALL ON public.newsletter_subscribers TO service_role;
 ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "NS anyone subscribe" ON public.newsletter_subscribers;
 CREATE POLICY "NS anyone subscribe" ON public.newsletter_subscribers FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "NS staff read" ON public.newsletter_subscribers;
 CREATE POLICY "NS staff read" ON public.newsletter_subscribers FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
+DROP POLICY IF EXISTS "NS admins manage" ON public.newsletter_subscribers;
 CREATE POLICY "NS admins manage" ON public.newsletter_subscribers FOR UPDATE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+DROP POLICY IF EXISTS "NS admins delete" ON public.newsletter_subscribers;
 CREATE POLICY "NS admins delete" ON public.newsletter_subscribers FOR DELETE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
 
@@ -673,6 +732,7 @@ CREATE TABLE IF NOT EXISTS public.saved_properties (
 GRANT SELECT,INSERT,DELETE ON public.saved_properties TO authenticated;
 GRANT ALL ON public.saved_properties TO service_role;
 ALTER TABLE public.saved_properties ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Saved own" ON public.saved_properties;
 CREATE POLICY "Saved own" ON public.saved_properties FOR ALL TO authenticated
   USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
@@ -686,7 +746,9 @@ GRANT SELECT ON public.featured_properties TO anon, authenticated;
 GRANT INSERT,UPDATE,DELETE ON public.featured_properties TO authenticated;
 GRANT ALL ON public.featured_properties TO service_role;
 ALTER TABLE public.featured_properties ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "FP public read" ON public.featured_properties;
 CREATE POLICY "FP public read" ON public.featured_properties FOR SELECT USING (true);
+DROP POLICY IF EXISTS "FP editors manage" ON public.featured_properties;
 CREATE POLICY "FP editors manage" ON public.featured_properties FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -704,8 +766,10 @@ CREATE INDEX IF NOT EXISTS idx_activity_logs_created ON public.activity_logs(cre
 GRANT SELECT, INSERT ON public.activity_logs TO authenticated;
 GRANT ALL ON public.activity_logs TO service_role;
 ALTER TABLE public.activity_logs ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "AL staff read" ON public.activity_logs;
 CREATE POLICY "AL staff read" ON public.activity_logs FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+DROP POLICY IF EXISTS "AL staff insert" ON public.activity_logs;
 CREATE POLICY "AL staff insert" ON public.activity_logs FOR INSERT TO authenticated
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
 
@@ -731,7 +795,9 @@ GRANT SELECT ON public.settings TO anon, authenticated;
 GRANT INSERT,UPDATE ON public.settings TO authenticated;
 GRANT ALL ON public.settings TO service_role;
 ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "S public read" ON public.settings;
 CREATE POLICY "S public read" ON public.settings FOR SELECT USING (true);
+DROP POLICY IF EXISTS "S admins manage" ON public.settings;
 CREATE POLICY "S admins manage" ON public.settings FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
@@ -848,10 +914,13 @@ CREATE INDEX IF NOT EXISTS idx_agent_verifications_status ON public.agent_verifi
 GRANT SELECT, INSERT, UPDATE ON public.agent_verifications TO authenticated;
 GRANT ALL ON public.agent_verifications TO service_role;
 ALTER TABLE public.agent_verifications ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "AV staff read" ON public.agent_verifications;
 CREATE POLICY "AV staff read" ON public.agent_verifications FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "AV agents insert own" ON public.agent_verifications;
 CREATE POLICY "AV agents insert own" ON public.agent_verifications FOR INSERT TO authenticated
   WITH CHECK (EXISTS (SELECT 1 FROM public.agents a WHERE a.id = agent_id AND a.user_id = auth.uid()));
+DROP POLICY IF EXISTS "AV admins manage" ON public.agent_verifications;
 CREATE POLICY "AV admins manage" ON public.agent_verifications FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
@@ -881,7 +950,9 @@ GRANT SELECT ON public.marketing_assets TO anon, authenticated;
 GRANT INSERT, UPDATE ON public.marketing_assets TO authenticated;
 GRANT ALL ON public.marketing_assets TO service_role;
 ALTER TABLE public.marketing_assets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "MA public read" ON public.marketing_assets;
 CREATE POLICY "MA public read" ON public.marketing_assets FOR SELECT USING (true);
+DROP POLICY IF EXISTS "MA editors manage" ON public.marketing_assets;
 CREATE POLICY "MA editors manage" ON public.marketing_assets FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
@@ -910,10 +981,13 @@ GRANT SELECT ON public.social_videos TO anon, authenticated;
 GRANT INSERT, UPDATE ON public.social_videos TO authenticated;
 GRANT ALL ON public.social_videos TO service_role;
 ALTER TABLE public.social_videos ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "SV public read published" ON public.social_videos;
 CREATE POLICY "SV public read published" ON public.social_videos FOR SELECT
   USING (published = true);
+DROP POLICY IF EXISTS "SV staff read all" ON public.social_videos;
 CREATE POLICY "SV staff read all" ON public.social_videos FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
+DROP POLICY IF EXISTS "SV editors manage" ON public.social_videos;
 CREATE POLICY "SV editors manage" ON public.social_videos FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
@@ -939,7 +1013,9 @@ GRANT SELECT ON public.referral_partners TO anon, authenticated;
 GRANT INSERT, UPDATE ON public.referral_partners TO authenticated;
 GRANT ALL ON public.referral_partners TO service_role;
 ALTER TABLE public.referral_partners ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "RP public read active" ON public.referral_partners;
 CREATE POLICY "RP public read active" ON public.referral_partners FOR SELECT USING (active = true);
+DROP POLICY IF EXISTS "RP editors manage" ON public.referral_partners;
 CREATE POLICY "RP editors manage" ON public.referral_partners FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
@@ -966,8 +1042,10 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON public.subscriptions(stat
 GRANT SELECT ON public.subscriptions TO authenticated;
 GRANT ALL ON public.subscriptions TO service_role;
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Sub staff read" ON public.subscriptions;
 CREATE POLICY "Sub staff read" ON public.subscriptions FOR SELECT TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+DROP POLICY IF EXISTS "Sub admins manage" ON public.subscriptions;
 CREATE POLICY "Sub admins manage" ON public.subscriptions FOR ALL TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
