@@ -1597,11 +1597,12 @@ CREATE TABLE IF NOT EXISTS public.short_link_clicks (
   utm_medium text,
   utm_campaign text,
   country text,
-  created_at timestamptz NOT NULL DEFAULT now()
+  created_at timestamptz NOT NULL DEFAULT now(),
+  created_date date GENERATED ALWAYS AS (created_at::date) STORED
 );
 -- Uniqueness per (link, ip_hash, day) prevents double counting.
 CREATE UNIQUE INDEX IF NOT EXISTS uq_short_link_clicks_per_day
-  ON public.short_link_clicks(short_link_id, ip_hash, (created_at::date));
+  ON public.short_link_clicks(short_link_id, ip_hash, created_date);
 CREATE INDEX IF NOT EXISTS idx_short_link_clicks_link_created
   ON public.short_link_clicks(short_link_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_short_link_clicks_ip
@@ -1642,7 +1643,7 @@ BEGIN
     p_short_link_id, p_ip_hash, p_user_agent, p_referrer,
     p_utm_source, p_utm_medium, p_utm_campaign, p_country
   )
-  ON CONFLICT (short_link_id, ip_hash, (created_at::date)) DO NOTHING
+  ON CONFLICT (short_link_id, ip_hash, created_date) DO NOTHING
   RETURNING true INTO v_inserted;
 
   IF v_inserted THEN
