@@ -1120,6 +1120,7 @@ ALTER TABLE public.agents
   ADD COLUMN IF NOT EXISTS reviewed_listing_count int NOT NULL DEFAULT 0;
 
 -- Trigger to keep published_listing_count in sync
+DROP FUNCTION IF EXISTS public.touch_agent_listing_count() CASCADE;
 CREATE OR REPLACE FUNCTION public.touch_agent_listing_count()
 RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
 BEGIN
@@ -1134,12 +1135,14 @@ BEGIN
 
   IF TG_OP = 'UPDATE' THEN
     -- status transitions
-    IF OLD.publish_status IS DISTINCT FROM NEW.publish_status THEN
-      IF OLD.publish_status = 'published' AND NEW.publish_status <> 'published' AND NEW.agent_id IS NOT NULL THEN
+    IF (OLD.publish_status IS NULL AND NEW.publish_status IS NOT NULL) OR
+       (OLD.publish_status IS NOT NULL AND NEW.publish_status IS NULL) OR
+       (OLD.publish_status IS NOT NULL AND NEW.publish_status IS NOT NULL AND OLD.publish_status <> NEW.publish_status) THEN
+      IF OLD.publish_status = 'published' AND (NEW.publish_status IS NULL OR NEW.publish_status <> 'published') AND NEW.agent_id IS NOT NULL THEN
         UPDATE public.agents
           SET published_listing_count = GREATEST(0, published_listing_count - 1)
           WHERE id = NEW.agent_id;
-      ELSIF NEW.publish_status = 'published' AND OLD.publish_status <> 'published' AND NEW.agent_id IS NOT NULL THEN
+      ELSIF NEW.publish_status = 'published' AND (OLD.publish_status IS NULL OR OLD.publish_status <> 'published') AND NEW.agent_id IS NOT NULL THEN
         UPDATE public.agents
           SET published_listing_count = published_listing_count + 1
           WHERE id = NEW.agent_id;
