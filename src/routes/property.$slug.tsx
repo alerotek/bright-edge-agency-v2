@@ -73,33 +73,72 @@ function PropertyDetail() {
 
   return (
     <>
-      {/* Gallery */}
+      {/* Gallery — 2+3 mosaic */}
       <section className="bg-muted/30">
         <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-          <Link to="/properties" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+          <Link
+            to="/properties"
+            className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+          >
             <ChevronLeft className="mr-1 h-4 w-4" /> All properties
           </Link>
         </div>
-        <div className="mx-auto mt-4 max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-2 sm:grid-cols-4 sm:grid-rows-2">
-            <button
-              type="button"
-              onClick={() => setLightbox(0)}
-              className="relative col-span-4 row-span-2 aspect-[16/10] overflow-hidden rounded-2xl bg-muted sm:col-span-2"
-            >
-              <img src={images[0]?.image_url} alt={p.title} className="h-full w-full object-cover" />
-            </button>
-            {images.slice(1, 5).map((img: any, i: number) => (
-              <button key={img.id} type="button" onClick={() => setLightbox(i + 1)} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-muted">
-                <img src={img.image_url} alt={`${p.title} ${i + 2}`} className="h-full w-full object-cover" />
-                {i === 3 && images.length > 5 ? (
-                  <span className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-semibold text-white">
-                    +{images.length - 5} photos
+
+        <div className="mx-auto mt-4 max-w-7xl px-4 pb-6 sm:px-6 lg:px-8">
+          {images.length === 0 ? null : (
+            <div className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr]">
+              {/* Hero image — full height left column */}
+              <button
+                type="button"
+                onClick={() => setLightbox(0)}
+                className="relative row-span-2 aspect-[3/4] overflow-hidden rounded-2xl bg-muted sm:aspect-auto sm:min-h-[420px]"
+              >
+                <img
+                  src={images[0]?.image_url}
+                  alt={p.title}
+                  className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+                />
+                {/* View all overlay on first image when on mobile */}
+                {images.length > 1 && (
+                  <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-lg bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm sm:hidden">
+                    1 / {images.length}
                   </span>
-                ) : null}
+                )}
               </button>
-            ))}
-          </div>
+
+              {/* Three smaller images — right column */}
+              {images.slice(1, 4).map((img: any, i: number) => (
+                <button
+                  key={img.id}
+                  type="button"
+                  onClick={() => setLightbox(i + 1)}
+                  className="relative hidden aspect-square overflow-hidden rounded-2xl bg-muted sm:block"
+                >
+                  <img
+                    src={img.image_url}
+                    alt={`${p.title} ${i + 2}`}
+                    className="h-full w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+                  />
+                  {/* +N overlay on last visible thumbnail */}
+                  {i === 2 && images.length > 4 && (
+                    <span className="absolute inset-0 grid place-items-center bg-black/55 text-sm font-semibold text-white">
+                      +{images.length - 4} photos
+                    </span>
+                  )}
+                </button>
+              ))}
+
+              {/* Placeholder slots if fewer than 4 images */}
+              {Array.from({ length: Math.max(0, 3 - Math.min(images.length - 1, 3)) }).map(
+                (_, i) => (
+                  <div
+                    key={`placeholder-${i}`}
+                    className="hidden aspect-square overflow-hidden rounded-2xl bg-muted/60 sm:block"
+                  />
+                ),
+              )}
+            </div>
+          )}
         </div>
       </section>
 
