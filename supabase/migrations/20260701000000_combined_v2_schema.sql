@@ -411,7 +411,9 @@ CREATE POLICY "PA editors manage" ON public.property_amenities FOR ALL TO authen
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor']::app_role[]));
 
 -- ============================================================
--- Publish guard: properties cannot be 'published' with <3 images
+-- Publish guard: properties cannot be 'published' with <5 images
+-- (defined once here; re-stated as CREATE OR REPLACE in V2 Phase 2
+--  only to update the minimum — the trigger itself is recreated there)
 -- ============================================================
 CREATE OR REPLACE FUNCTION public.enforce_property_min_images()
 RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
@@ -419,8 +421,8 @@ DECLARE img_count int;
 BEGIN
   IF NEW.publish_status = 'published' THEN
     SELECT count(*) INTO img_count FROM public.property_images WHERE property_id = NEW.id;
-    IF img_count < 3 THEN
-      RAISE EXCEPTION 'Property must have at least 3 images before publishing (currently %).', img_count
+    IF img_count < 5 THEN
+      RAISE EXCEPTION 'Property must have at least 5 images before publishing (currently %)', img_count
         USING ERRCODE = 'check_violation';
     END IF;
     IF NEW.published_at IS NULL THEN NEW.published_at := now(); END IF;
@@ -897,10 +899,14 @@ ALTER TABLE public.settings ADD COLUMN IF NOT EXISTS commission_enabled boolean 
 ALTER TABLE public.settings ADD COLUMN IF NOT EXISTS stripe_connect_enabled boolean NOT NULL DEFAULT false;
 
 -- NEW TABLE: AGENT_VERIFICATIONS
+-- status uses text (not the enum) so the V2 Phase 2 block can extend
+-- the allowed values without requiring an ALTER TYPE mid-migration.
+-- Policies, trigger, and the SLA index are all finalised in the
+-- V2 Phase 2 section below; only the table + basic grants are created here.
 CREATE TABLE IF NOT EXISTS public.agent_verifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   agent_id uuid NOT NULL REFERENCES public.agents(id) ON DELETE CASCADE,
-  status agent_verification_status NOT NULL DEFAULT 'pending',
+  status text NOT NULL DEFAULT 'pending',  -- pending|under_review|approved|rejected
   submitted_at timestamptz NOT NULL DEFAULT now(),
   reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   reviewed_at timestamptz,
@@ -914,19 +920,7 @@ CREATE INDEX IF NOT EXISTS idx_agent_verifications_status ON public.agent_verifi
 GRANT SELECT, INSERT, UPDATE ON public.agent_verifications TO authenticated;
 GRANT ALL ON public.agent_verifications TO service_role;
 ALTER TABLE public.agent_verifications ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "AV staff read" ON public.agent_verifications;
-CREATE POLICY "AV staff read" ON public.agent_verifications FOR SELECT TO authenticated
-  USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin','editor','agent']::app_role[]));
-DROP POLICY IF EXISTS "AV agents insert own" ON public.agent_verifications;
-CREATE POLICY "AV agents insert own" ON public.agent_verifications FOR INSERT TO authenticated
-  WITH CHECK (EXISTS (SELECT 1 FROM public.agents a WHERE a.id = agent_id AND a.user_id = auth.uid()));
-DROP POLICY IF EXISTS "AV admins manage" ON public.agent_verifications;
-CREATE POLICY "AV admins manage" ON public.agent_verifications FOR ALL TO authenticated
-  USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
-  WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
-DROP TRIGGER IF EXISTS trg_agent_verifications_updated ON public.agent_verifications;
-CREATE TRIGGER trg_agent_verifications_updated BEFORE UPDATE ON public.agent_verifications
-  FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+-- Policies and trigger are defined in the V2 Phase 2 block below.
 
 -- NEW TABLE: MARKETING_ASSETS
 CREATE TABLE IF NOT EXISTS public.marketing_assets (
@@ -1671,27 +1665,11 @@ ALTER TABLE public.property_images
   ADD COLUMN IF NOT EXISTS image_bytes bigint;
 CREATE INDEX IF NOT EXISTS idx_property_images_hash ON public.property_images(image_hash);
 
--- Agent verification state machine tables
-CREATE TABLE IF NOT EXISTS public.agent_verifications (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  agent_id uuid NOT NULL REFERENCES public.agents(id) ON DELETE CASCADE,
-  status text NOT NULL DEFAULT 'pending',  -- pending|under_review|approved|rejected
-  submitted_at timestamptz NOT NULL DEFAULT now(),
-  reviewed_at timestamptz,
-  reviewed_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  notes text,
-  documents jsonb DEFAULT '[]'::jsonb,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS idx_agent_verifications_agent ON public.agent_verifications(agent_id);
-CREATE INDEX IF NOT EXISTS idx_agent_verifications_status ON public.agent_verifications(status);
+-- Agent verification state machine: V2 additions
+-- Table already created in the V2 foundation block above.
+-- Add SLA index, finalise all policies, and attach the updated_at trigger.
 CREATE INDEX IF NOT EXISTS idx_agent_verifications_sla ON public.agent_verifications(submitted_at)
   WHERE status = 'under_review';
-
-GRANT SELECT, INSERT, UPDATE ON public.agent_verifications TO authenticated;
-GRANT ALL ON public.agent_verifications TO service_role;
-ALTER TABLE public.agent_verifications ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "AV staff read" ON public.agent_verifications;
 CREATE POLICY "AV staff read" ON public.agent_verifications FOR SELECT TO authenticated
@@ -1709,6 +1687,11 @@ DROP POLICY IF EXISTS "AV staff manage" ON public.agent_verifications;
 CREATE POLICY "AV staff manage" ON public.agent_verifications FOR UPDATE TO authenticated
   USING (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]))
   WITH CHECK (public.has_any_role(auth.uid(), ARRAY['super_admin','admin']::app_role[]));
+
+-- updated_at trigger (was missing from the original V2 Phase 2 block)
+DROP TRIGGER IF EXISTS trg_agent_verifications_updated ON public.agent_verifications;
+CREATE TRIGGER trg_agent_verifications_updated BEFORE UPDATE ON public.agent_verifications
+  FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
 
 -- Verification step log (append-only audit trail)
 CREATE TABLE IF NOT EXISTS public.agent_verification_steps (
@@ -1739,22 +1722,8 @@ DROP POLICY IF EXISTS "AVS self insert" ON public.agent_verification_steps;
 CREATE POLICY "AVS self insert" ON public.agent_verification_steps FOR INSERT TO authenticated
   WITH CHECK (agent_id IN (SELECT id FROM public.agents WHERE user_id = auth.uid()));
 
--- Property validation: extend the publish guard
-CREATE OR REPLACE FUNCTION public.enforce_property_min_images()
-RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
-DECLARE img_count int;
-BEGIN
-  IF NEW.publish_status = 'published' THEN
-    SELECT count(*) INTO img_count FROM public.property_images WHERE property_id = NEW.id;
-    IF img_count < 5 THEN
-      RAISE EXCEPTION 'Property must have at least 5 images before publishing (currently %)', img_count
-        USING ERRCODE = 'check_violation';
-    END IF;
-    IF NEW.published_at IS NULL THEN NEW.published_at := now(); END IF;
-  END IF;
-  RETURN NEW;
-END;$$;
--- Re-create (idempotent)
+-- Property validation: publish guard already defined and up-to-date (min 5 images)
+-- above — trigger is recreated here to ensure it survives the V2 Phase 2 block.
 DROP TRIGGER IF EXISTS trg_property_publish_guard ON public.properties;
 CREATE TRIGGER trg_property_publish_guard
   BEFORE INSERT OR UPDATE OF publish_status ON public.properties

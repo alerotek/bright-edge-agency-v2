@@ -82,7 +82,21 @@ DELETE FROM public.properties;
 
 -- Properties (8 sample listings with V2 fields)
 -- Using subqueries to resolve FKs by slug/name
-INSERT INTO public.properties (title, slug, excerpt, description, category_id, property_type_id, status_id, location_id, agent_id, listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, publish_status, featured, published_at, validation_status, listing_expires_at, auto_renew, syndicated, promoted_until, virtual_tour_url, floor_plan_url, house_hunting_fee_kes, viewing_fee_kes, fees_refundable, fee_payment_timing, commission_kes, commission_notes, video_url, video_provider, country, county, town, neighbourhood, landmark, available_from, furnished_status, lease_period, deposit_amount_kes, utilities_info, marketing_score, marketing_checklist, ai_captions, suggested_hashtags)
+--
+-- Bug fixes applied:
+--   #3: VALUES alias list was missing the 'publish_status' column that is
+--       hardcoded as 'draft' in the SELECT. This shifted every alias after
+--       'address' by one position, making published_at map to featured, etc.
+--       Fixed by removing 'publish_status' from the INSERT target list and
+--       the hardcoded 'draft' literal from the SELECT — publish_status is set
+--       explicitly in the UPDATE block below after images are inserted.
+--   #4: commercial/land rows passed NULL for furnished_status but the column
+--       is NOT NULL DEFAULT 'unfurnished'. NULL from VALUES overrides the
+--       column default, causing a NOT NULL violation. Fixed by using
+--       COALESCE(furnished_status, 'unfurnished'::furnished_status) in SELECT.
+--   #5: NULL rows for fee_payment needed an explicit ::rental_fee_timing cast
+--       to avoid a type-inference error. Fixed via COALESCE with explicit cast.
+INSERT INTO public.properties (title, slug, excerpt, description, category_id, property_type_id, status_id, location_id, agent_id, listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, featured, published_at, validation_status, listing_expires_at, auto_renew, syndicated, promoted_until, virtual_tour_url, floor_plan_url, house_hunting_fee_kes, viewing_fee_kes, fees_refundable, fee_payment_timing, commission_kes, commission_notes, video_url, video_provider, country, county, town, neighbourhood, landmark, available_from, furnished_status, lease_period, deposit_amount_kes, utilities_info, marketing_score, marketing_checklist, ai_captions, suggested_hashtags)
 SELECT
   title, slug, excerpt, description,
   (SELECT id FROM public.property_categories WHERE slug = category_slug),
@@ -90,12 +104,16 @@ SELECT
   (SELECT id FROM public.property_statuses WHERE slug = status_slug),
   (SELECT id FROM public.locations WHERE slug = location_slug),
   (SELECT id FROM public.agents WHERE slug = agent_slug),
-  listing_type::property_listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, 'draft'::property_publish_status, featured, published_at,
+  listing_type::property_listing_type, price, currency, bedrooms, bathrooms, area_sqft, address,
+  featured, published_at,
   'active'::listing_validation_status, now() + interval '90 days', true, false, now() + interval '30 days',
-  virtual_tour_url, floor_plan_url, house_hunting_fee, viewing_fee, fees_refundable, fee_payment,
+  virtual_tour_url, floor_plan_url, house_hunting_fee, viewing_fee, fees_refundable,
+  COALESCE(fee_payment::rental_fee_timing, NULL::rental_fee_timing),
   commission_kes, commission_notes, video_url, video_provider,
   country, county, town, neighbourhood, landmark,
-  available_from, furnished_status, lease_period, deposit_kes, utilities_info,
+  available_from,
+  COALESCE(furnished_status::furnished_status, 'unfurnished'::furnished_status),
+  lease_period, deposit_kes, utilities_info,
   marketing_score, marketing_checklist::jsonb, ai_captions, suggested_hashtags::text[]
 FROM (VALUES
   ('Luxury 4BR Apartment in Westlands', 'luxury-4br-apartment-westlands', 'Stunning penthouse with panoramic city views and premium finishes throughout.', 'This exceptional 4-bedroom apartment occupies the top floor of Westlands most prestigious address. Floor-to-ceiling windows flood the open-plan living space with natural light, while the master suite features a walk-in ensuite and private balcony. Building amenities include a rooftop pool, gym, 24-hour security, and dedicated parking.', 'residential', 'apartment', 'available', 'westlands', 'amina-mwangi', 'sale', 45000000, 'KES', 4, 3, 2800, 'Westlands Commercial Centre, Nairobi', true, now() - interval '2 days', 'https://matterport.com/demo/tour', 'https://example.com/floorplans/westlands-penthouse.pdf', 50000, 10000, true, 'before_viewing', 1125000, '2.5% commission on final sale price', 'https://youtube.com/watch?v=demo', 'youtube', 'Kenya', 'Nairobi', 'Nairobi', 'Westlands', 'Westlands Commercial Centre', NULL, 'semi-furnished', NULL, NULL, 'Water and electricity included in service charge', 85, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true}]'::jsonb, 'Experience luxury living in Westlands with this stunning penthouse featuring panoramic city views and premium finishes throughout.', ARRAY['luxury', 'penthouse', 'westlands', 'nairobi', 'cityviews']),
@@ -106,7 +124,25 @@ FROM (VALUES
   ('Prime Development Land in Athi River', 'prime-development-land-athi-river', '5-acre plot with approved mixed-use plans.', 'A prime 5-acre plot located 500m from the Nairobi-Mombasa highway with approved mixed-use development plans. The land has a clean title, access road, and water connection. Ideal for residential or commercial development in this fast-growing corridor.', 'land', 'plot', 'available', 'mombasa-road', 'david-njoroge', 'sale', 75000000, 'KES', 0, 0, 217800, 'Athi River, Machakos', false, now() - interval '10 days', NULL, NULL, 0, 0, false, NULL, NULL, NULL, NULL, NULL, 'Kenya', 'Machakos', 'Athi River', NULL, 'Namanga Road', NULL, NULL, NULL, NULL, 'Water and electricity connected at boundary', 70, '[{"task":"photos","completed":true},{"task":"title_search","completed":true},{"task":"survey","completed":true},{"task":"description","completed":true}]'::jsonb, 'Prime 5-acre development plot in Athi River with approved mixed-use plans. Clean title, water connected.', ARRAY['land', 'development', 'athi-river', 'investment', 'plot']),
   ('Penthouse Suite in Westlands', 'penthouse-suite-westlands', 'Ultra-luxury penthouse with private rooftop terrace.', 'The finest penthouse in Westlands. This 4000 sqft masterpiece features a double-volume living area, private rooftop terrace with jacuzzi, chef kitchen with Miele appliances, and a master suite with his-and-hers walk-in closets. Two parking spaces and a storage room included.', 'residential', 'apartment', 'under-offer', 'westlands', 'amina-mwangi', 'sale', 120000000, 'KES', 4, 4, 4000, 'Waiyaki Way, Westlands', true, now() - interval '14 days', 'https://matterport.com/demo/tour4', 'https://example.com/floorplans/westlands-ultra.pdf', 100000, 20000, true, 'before_viewing', 3000000, '2.5% commission on final sale price', 'https://youtube.com/watch?v=demo4', 'youtube', 'Kenya', 'Nairobi', 'Nairobi', 'Westlands', 'Sarit Centre', NULL, 'fully-furnished', NULL, NULL, 'Smart home system, private lift access', 95, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true},{"task":"video","completed":true},{"task":"smart_home","completed":true}]'::jsonb, 'Ultra-luxury Westlands penthouse with private rooftop terrace, jacuzzi, and chef kitchen. 4000 sqft of pure elegance.', ARRAY['penthouse', 'ultra-luxury', 'rooftop', 'westlands', 'smart-home']),
   ('Coastal Villa with Private Beach', 'coastal-villa-private-beach', 'Exclusive 6BR villa with direct beach access on the Kenyan coast.', 'An extraordinary 6-bedroom villa set on 2 acres of manicured grounds with 200m of private beach frontage. Features include an infinity pool overlooking the ocean, separate guest house, staff quarters for 4, and a tropical garden with mature coconut palms. A once-in-a-lifetime opportunity.', 'residential', 'villa', 'available', 'nyali', 'cynthia-kimani', 'sale', 250000000, 'KES', 6, 5, 8000, 'Diani Beach Road, Kwale', true, now() - interval '1 day', 'https://matterport.com/demo/tour5', 'https://example.com/floorplans/diani-villa.pdf', 150000, 30000, true, 'before_viewing', 7500000, '3% commission on final sale price', 'https://youtube.com/watch?v=demo5', 'youtube', 'Kenya', 'Kwale', 'Diani', NULL, 'Diani Beach', NULL, 'fully-furnished', NULL, NULL, 'Private beach access, infinity pool, guest house, staff quarters included', 92, '[{"task":"photos","completed":true},{"task":"virtual_tour","completed":true},{"task":"floor_plan","completed":true},{"task":"description","completed":true},{"task":"pricing","completed":true},{"task":"video","completed":true},{"task":"aerial_footage","completed":true}]'::jsonb, 'Exclusive 6-bedroom villa with 200m private beach frontage in Diani. Infinity pool, guest house, tropical garden.', ARRAY['villa', 'beachfront', 'private-beach', 'diani', 'luxury', 'oceanfront'])
-) AS v(title, slug, excerpt, description, category_slug, type_slug, status_slug, location_slug, agent_slug, listing_type, price, currency, bedrooms, bathrooms, area_sqft, address, featured, published_at, validation_status, listing_expires_at, auto_renew, syndicated, promoted_until, virtual_tour_url, floor_plan_url, house_hunting_fee, viewing_fee, fees_refundable, fee_payment, commission_kes, commission_notes, video_url, video_provider, country, county, town, neighbourhood, landmark, available_from, furnished_status, lease_period, deposit_kes, utilities_info, marketing_score, marketing_checklist, ai_captions, suggested_hashtags)
+) AS v(
+  -- identity
+  title, slug, excerpt, description,
+  -- FK slugs (resolved by subqueries in SELECT)
+  category_slug, type_slug, status_slug, location_slug, agent_slug,
+  -- core fields  (publish_status intentionally omitted — set by UPDATE below)
+  listing_type, price, currency, bedrooms, bathrooms, area_sqft, address,
+  featured, published_at,
+  -- V2 marketing / listing fields (hardcoded in SELECT: validation_status, listing_expires_at, auto_renew, syndicated, promoted_until)
+  virtual_tour_url, floor_plan_url,
+  house_hunting_fee, viewing_fee, fees_refundable, fee_payment,
+  commission_kes, commission_notes, video_url, video_provider,
+  -- location hierarchy
+  country, county, town, neighbourhood, landmark,
+  -- rental / spec fields (furnished_status NULLs resolved by COALESCE in SELECT)
+  available_from, furnished_status, lease_period, deposit_kes, utilities_info,
+  -- marketing
+  marketing_score, marketing_checklist, ai_captions, suggested_hashtags
+)
 ON CONFLICT (slug) DO NOTHING;
 
 -- Property images (5 per property, satisfies min-5 trigger for V2)
