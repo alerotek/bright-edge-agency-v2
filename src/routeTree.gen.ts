@@ -21,8 +21,10 @@ import { Route as AgentsRouteImport } from './routes/agents'
 import { Route as AgentSignupRouteImport } from './routes/agent-signup'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as JoinRouteImport } from './routes/join'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AgentIndexRouteImport } from './routes/agent/index'
+import { Route as AgentEnquiriesRouteImport } from './routes/agent/enquiries'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ReviewsSlugRouteImport } from './routes/reviews.$slug'
 import { Route as PropertySlugRouteImport } from './routes/property.$slug'
@@ -34,8 +36,10 @@ import { Route as AdminReviewsIndexRouteImport } from './routes/admin/reviews/in
 import { Route as AdminPropertiesIndexRouteImport } from './routes/admin/properties/index'
 import { Route as AdminLocationsIndexRouteImport } from './routes/admin/locations/index'
 import { Route as AdminInquiriesIndexRouteImport } from './routes/admin/inquiries/index'
+import { Route as AdminInquiriesIdRouteImport } from './routes/admin/inquiries/$id'
 import { Route as AdminBlogIndexRouteImport } from './routes/admin/blog/index'
 import { Route as AdminAgentsIndexRouteImport } from './routes/admin/agents/index'
+import { Route as AdminAgentsVerificationRouteImport } from './routes/admin/agents/verification'
 import { Route as AdminPropertiesNewRouteImport } from './routes/admin/properties/_new'
 import { Route as AdminPropertiesIdRouteImport } from './routes/admin/properties/$id'
 import { Route as AdminAgentsNewRouteImport } from './routes/admin/agents/_new'
@@ -217,6 +221,28 @@ const AdminMarketingAssetsNewRoute = AdminMarketingAssetsNewRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 
+// ── New routes added in Part 3 ──────────────────────────────────────────────
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentEnquiriesRoute = AgentEnquiriesRouteImport.update({
+  id: '/agent/enquiries',
+  path: '/agent/enquiries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInquiriesIdRoute = AdminInquiriesIdRouteImport.update({
+  id: '/inquiries/$id',
+  path: '/inquiries/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAgentsVerificationRoute = AdminAgentsVerificationRouteImport.update({
+  id: '/agents/verification',
+  path: '/agents/verification',
+  getParentRoute: () => AdminRoute,
+} as any)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
@@ -226,11 +252,13 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
+  '/join': typeof JoinRoute
   '/privacy': typeof PrivacyRoute
   '/properties': typeof PropertiesRoute
   '/reviews': typeof ReviewsRouteWithChildren
   '/services': typeof ServicesRoute
   '/terms': typeof TermsRoute
+  '/agent/enquiries': typeof AgentEnquiriesRoute
   '/agent/onboarding': typeof AgentOnboardingRoute
   '/agents/$slug': typeof AgentsSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -239,10 +267,12 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/agent/': typeof AgentIndexRoute
   '/admin/agents': typeof AdminAgentsNewRoute
+  '/admin/agents/verification': typeof AdminAgentsVerificationRoute
   '/admin/properties/$id': typeof AdminPropertiesIdRoute
   '/admin/properties': typeof AdminPropertiesNewRoute
   '/admin/agents/': typeof AdminAgentsIndexRoute
   '/admin/blog/': typeof AdminBlogIndexRoute
+  '/admin/inquiries/$id': typeof AdminInquiriesIdRoute
   '/admin/inquiries/': typeof AdminInquiriesIndexRoute
   '/admin/locations/': typeof AdminLocationsIndexRoute
   '/admin/properties/': typeof AdminPropertiesIndexRoute

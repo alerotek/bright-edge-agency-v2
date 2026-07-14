@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { settingsQuery } from "@/lib/queries";
@@ -53,6 +53,13 @@ function ContactPage() {
             </Button>
           </div>
         ) : null}
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <h3 className="font-display text-lg font-semibold">Join Our Team</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Are you a real estate professional? Join Bright Edge as a verified agent.</p>
+          <Button asChild className="mt-4 w-full" variant="outline">
+            <Link to="/join">Become an Agent</Link>
+          </Button>
+        </div>
       </aside>
     </section>
   );

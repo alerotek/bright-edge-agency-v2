@@ -58,8 +58,11 @@ export const adminInquiriesQuery = queryOptions({
     const { data, error } = await supabase
       .from("inquiries")
       .select(`
-        id, full_name, email, phone, message, status, source, created_at,
-        property:properties(title, slug)
+        id, full_name, email, phone, message, status, source,
+        inquiry_type, preferred_viewing_date, preferred_viewing_time,
+        budget_kes, whatsapp_notified_at, created_at, updated_at,
+        property:properties(id, title, slug),
+        agent:agents(id, full_name, slug, phone, whatsapp)
       `)
       .order("created_at", { ascending: false });
     if (error) throw error;

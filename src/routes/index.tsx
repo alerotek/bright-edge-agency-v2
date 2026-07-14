@@ -296,6 +296,45 @@ function HomePage() {
       </section>
 
       {/* ══════════════════════════════════════════
+          AGENT RECRUITMENT STRIP
+      ══════════════════════════════════════════ */}
+      <section className="border-y border-border bg-primary text-primary-foreground">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-12 sm:flex-row sm:items-center sm:px-6 lg:px-8">
+          <div className="max-w-lg">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+              Now recruiting
+            </p>
+            <h2 className="mt-2 font-display text-2xl font-semibold text-white sm:text-3xl">
+              Are you a real estate professional?
+            </h2>
+            <p className="mt-2 text-sm text-white/70">
+              Join Bright Edge as a verified independent agent. We provide the platform, the leads,
+              and the marketing — you close the deals.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-3">
+            <Button
+              asChild
+              size="lg"
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              <Link to="/join">
+                Learn more <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-white/30 bg-transparent text-white hover:bg-white/10"
+            >
+              <Link to="/agent-signup">Create account</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════
           WHY BRIGHT EDGE — horizontal stat strip
       ══════════════════════════════════════════ */}
       <section className="py-20">
@@ -551,6 +590,39 @@ function HomePage() {
           </div>
         </section>
       ) : null}
+      {/* ══════════════════════════════════════════
+          JOIN BRIGHT EDGE CTA (Recruitment)
+      ══════════════════════════════════════════ */}
+      <section className="bg-secondary/30 py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="relative isolate overflow-hidden bg-primary px-6 py-16 shadow-2xl rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-20 lg:px-24 lg:pt-0">
+            <div className="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
+              <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Are you a qualified agent?<br />Join Bright Edge today.
+              </h2>
+              <p className="mt-6 text-lg text-white/70 leading-8">
+                Gain access to exclusive leads, professional marketing support, and our advanced technology platform. 
+                Build your real estate career with a brand that values excellence.
+              </p>
+              <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
+                <Button asChild size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90">
+                  <Link to="/join">Learn more</Link>
+                </Button>
+                <Link to="/apply" className="text-sm font-semibold leading-6 text-white hover:text-white/80">
+                  Apply Now <span aria-hidden="true">→</span>
+                </Link>
+              </div>
+            </div>
+            <div className="relative mt-16 h-80 lg:mt-8 flex items-center justify-center">
+              <div className="h-64 w-64 rounded-full bg-white/5 p-8 ring-1 ring-white/10 backdrop-blur-3xl">
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-accent/20">
+                  <Award className="h-24 w-24 text-accent" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

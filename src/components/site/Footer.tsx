@@ -91,6 +91,11 @@ export function Footer() {
               <li><Link to="/reviews" className="hover:text-foreground">Property reviews</Link></li>
               <li><Link to="/blog" className="hover:text-foreground">Market insights</Link></li>
               <li><Link to="/agents" className="hover:text-foreground">Our agents</Link></li>
+              <li>
+                <Link to="/join" className="font-medium text-accent hover:text-accent/80">
+                  Become an Agent →
+                </Link>
+              </li>
             </ul>
           </div>
 

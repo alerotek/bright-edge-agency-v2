@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Image,
   Video,
+  ShieldCheck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ const nav = [
   { to: "/admin", icon: LayoutDashboard, label: "Overview", end: true },
   { to: "/admin/properties", icon: Building2, label: "Properties" },
   { to: "/admin/agents", icon: Users, label: "Agents" },
+  { to: "/admin/agents/verification", icon: ShieldCheck, label: "Verification Queue" },
   { to: "/admin/inquiries", icon: MessageSquareText, label: "Inquiries" },
   { to: "/admin/blog", icon: PenLine, label: "Blog" },
   { to: "/admin/reviews", icon: Star, label: "Reviews" },

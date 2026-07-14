@@ -85,6 +85,7 @@ function AgentOnboarding() {
           email: agent.email || user.email || "",
           fullName: agent.full_name || user.user_metadata?.full_name || "",
           phone: agent.phone || user.phone || "",
+          nationalIdNumber: (agent as any).national_id_number || "",
           emailVerified: !!user.email_confirmed_at,
           emailVerifiedAt: user.email_confirmed_at || null,
           position: agent.position || "",
@@ -122,6 +123,7 @@ function AgentOnboarding() {
         license_expiry: state.licenseExpiry || null,
         team_name: state.teamName,
         phone: state.phone,
+        national_id_number: state.nationalIdNumber || null,
         specializations: state.specializations,
         languages: state.languages,
         years_experience: state.yearsExperience,
@@ -309,6 +311,18 @@ function AgentOnboarding() {
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email Address</Label>
                     <Input id="email" value={state.email} disabled className="bg-muted/50" />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="nationalId">National ID Number *</Label>
+                    <Input
+                      id="nationalId"
+                      value={state.nationalIdNumber ?? ""}
+                      onChange={(e) => updateState({ nationalIdNumber: e.target.value })}
+                      placeholder="e.g. 12345678"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Used for identity verification. Not displayed publicly.
+                    </p>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="phone">Contact Phone</Label>

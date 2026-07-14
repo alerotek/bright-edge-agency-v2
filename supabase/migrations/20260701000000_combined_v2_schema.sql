@@ -287,7 +287,7 @@ CREATE TABLE IF NOT EXISTS public.properties (
   property_type_id uuid REFERENCES public.property_types(id) ON DELETE SET NULL,
   status_id uuid REFERENCES public.property_statuses(id) ON DELETE SET NULL,
   location_id uuid REFERENCES public.locations(id) ON DELETE SET NULL,
-  agent_id uuid REFERENCES public.agents(id) ON DELETE SET NULL,
+  agent_id uuid REFERENCES public.agents(id) ON DELETE RESTRICT,
   listing_type property_listing_type NOT NULL DEFAULT 'sale',
   price numeric(14,2) NOT NULL DEFAULT 0,
   currency text NOT NULL DEFAULT 'KES',
@@ -331,6 +331,56 @@ CREATE POLICY "Properties editors manage" ON public.properties FOR ALL TO authen
 DROP TRIGGER IF EXISTS trg_properties_updated ON public.properties;
 CREATE TRIGGER trg_properties_updated BEFORE UPDATE ON public.properties
   FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+
+-- Property ownership security constraints
+-- Ensure agent_id is NOT NULL for new properties (existing NULL values allowed for migration)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'properties_agent_id_not_null'
+  ) THEN
+    ALTER TABLE public.properties ADD CONSTRAINT properties_agent_id_not_null 
+      CHECK (agent_id IS NOT NULL);
+  END IF;
+END $$;
+
+-- Ensure agent is verified before property assignment
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'properties_agent_verified_check'
+  ) THEN
+    ALTER TABLE public.properties ADD CONSTRAINT properties_agent_verified_check
+      CHECK (
+        agent_id IS NULL OR 
+        EXISTS (
+          SELECT 1 FROM public.agents 
+          WHERE id = agent_id AND verification_status = 'verified'
+        )
+      );
+  END IF;
+END $$;
+
+-- Trigger to prevent orphan properties on agent deletion
+DROP FUNCTION IF EXISTS public.prevent_orphan_properties() CASCADE;
+CREATE FUNCTION public.prevent_orphan_properties()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public.properties 
+    WHERE agent_id = OLD.id
+  ) THEN
+    RAISE EXCEPTION 'Cannot delete agent with associated properties. Reassign properties first.';
+  END IF;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_agent_prevent_orphan ON public.agents;
+CREATE TRIGGER trg_agent_prevent_orphan BEFORE DELETE ON public.agents
+  FOR EACH ROW EXECUTE FUNCTION public.prevent_orphan_properties();
 
 -- ============================================================
 -- PROPERTY IMAGES / DOCS / VIDEOS

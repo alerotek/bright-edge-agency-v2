@@ -1,13 +1,18 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Bath, BedDouble, Calendar, Car, ChevronLeft, ChevronRight, Copy, ExternalLink, MapPin, Maximize, MessageCircle, Phone, Play, QrCode, Share2, ShieldCheck, X } from "lucide-react";
+import { Bath, BedDouble, Calendar, Car, ChevronLeft, ChevronRight, Copy, ExternalLink, MapPin, Maximize, Phone, Play, QrCode, Share2, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import { propertyBySlugQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { buildWhatsappLink, formatPrice } from "@/lib/format";
-import { InquiryForm } from "@/components/site/InquiryForm";
+import { formatPrice } from "@/lib/format";
+import {
+  WhatsAppButton,
+  InquiryForm,
+  ScheduleViewingForm,
+  CallAgentButton,
+} from "@/components/site/PropertyContactActions";
 
 export const Route = createFileRoute("/property/$slug")({
   loader: async ({ context, params }) => {
@@ -67,9 +72,7 @@ function PropertyDetail() {
   const images = [...(p.images ?? [])].sort((a: any, b: any) => a.image_order - b.image_order);
   const amenities = (p.property_amenities ?? []).map((pa: any) => pa.amenity).filter(Boolean);
   const [lightbox, setLightbox] = useState<number | null>(null);
-
-  const waPrefix = `Hi Bright Edge, I'm interested in "${p.title}" (${p.slug}).`;
-  const wa = (msg: string) => buildWhatsappLink(p.agent?.whatsapp ?? null, `${waPrefix} ${msg}`);
+  const [contactTab, setContactTab] = useState<"whatsapp" | "inquiry" | "viewing" | "call">("whatsapp");
 
   return (
     <>
@@ -312,19 +315,14 @@ function PropertyDetail() {
             </div>
           ) : null}
 
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="font-display text-xl font-semibold">Inquire about this property</h2>
-            <p className="mt-1 text-sm text-muted-foreground">We typically respond within four working hours.</p>
-            <div className="mt-4">
-              <InquiryForm propertyId={p.id} agentId={p.agent?.id ?? null} subject={p.title} />
-            </div>
-          </div>
+          {/* Inquiry form moved to sidebar contact tabs */}
         </div>
 
         {/* Sidebar */}
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           {p.agent ? (
             <div className="rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+              {/* Agent header */}
               <p className="text-xs font-semibold uppercase tracking-wider text-primary">Listing agent</p>
               <div className="mt-3 flex items-center gap-3">
                 {p.agent.photo ? (
@@ -339,24 +337,71 @@ function PropertyDetail() {
                   </Link>
                 </div>
               </div>
-              <div className="mt-5 space-y-2">
-                <Button asChild className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                  <a href={wa("Could we schedule a viewing?")} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" /> Schedule a viewing
-                  </a>
-                </Button>
-                <Button asChild variant="outline" className="w-full">
-                  <a href={wa("Could you share more details and floor plans?")} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" /> Request details
-                  </a>
-                </Button>
-                {p.agent.phone ? (
-                  <Button asChild variant="ghost" className="w-full">
-                    <a href={`tel:${p.agent.phone.replace(/\s/g, "")}`}>
-                      <Phone className="mr-2 h-4 w-4" /> {p.agent.phone}
-                    </a>
-                  </Button>
-                ) : null}
+
+              {/* Contact action tabs */}
+              <div className="mt-5">
+                {/* Tab bar */}
+                <div className="grid grid-cols-4 gap-1 rounded-xl bg-muted p-1">
+                  {(
+                    [
+                      { key: "whatsapp", label: "WhatsApp", short: "WA" },
+                      { key: "inquiry", label: "Inquire", short: "Inq" },
+                      { key: "viewing", label: "Viewing", short: "View" },
+                      { key: "call", label: "Call", short: "Call" },
+                    ] as const
+                  ).map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setContactTab(tab.key)}
+                      className={`rounded-lg py-1.5 text-xs font-semibold transition-colors ${
+                        contactTab === tab.key
+                          ? "bg-card text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <span className="sm:hidden">{tab.short}</span>
+                      <span className="hidden sm:inline">{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tab panels */}
+                <div className="mt-4">
+                  {contactTab === "whatsapp" && (
+                    <WhatsAppButton
+                      agentWhatsapp={p.agent.whatsapp}
+                      agentName={p.agent.full_name}
+                      propertyTitle={p.title}
+                    />
+                  )}
+                  {contactTab === "inquiry" && (
+                    <InquiryForm
+                      propertyId={p.id}
+                      propertyTitle={p.title}
+                      agentId={p.agent.id}
+                      agentWhatsapp={p.agent.whatsapp}
+                      agentName={p.agent.full_name}
+                      propertySlug={p.slug}
+                    />
+                  )}
+                  {contactTab === "viewing" && (
+                    <ScheduleViewingForm
+                      propertyId={p.id}
+                      propertyTitle={p.title}
+                      agentId={p.agent.id}
+                      agentWhatsapp={p.agent.whatsapp}
+                      agentName={p.agent.full_name}
+                      propertySlug={p.slug}
+                    />
+                  )}
+                  {contactTab === "call" && (
+                    <CallAgentButton
+                      agentPhone={p.agent.phone}
+                      agentName={p.agent.full_name}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           ) : null}

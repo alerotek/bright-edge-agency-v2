@@ -15,6 +15,8 @@ const NAV = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
+const JOIN_LINK = { to: "/join", label: "Become an Agent" } as const;
+
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -59,6 +61,10 @@ export function Header() {
               <span className="hidden lg:inline">{settings.primary_phone}</span>
             </a>
           ) : null}
+          {/* Join CTA — highlighted in the nav */}
+          <Button asChild variant="outline" size="sm" className="border-accent text-accent hover:bg-accent/10">
+            <Link to={JOIN_LINK.to}>{JOIN_LINK.label}</Link>
+          </Button>
           <Button asChild>
             <Link to="/contact">Get in touch</Link>
           </Button>
@@ -85,6 +91,13 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            <Link
+              to={JOIN_LINK.to}
+              className="rounded-md px-3 py-3 text-base font-medium text-accent hover:bg-accent/10"
+              onClick={() => setOpen(false)}
+            >
+              {JOIN_LINK.label}
+            </Link>
             <Button asChild className="mt-2">
               <Link to="/contact" onClick={() => setOpen(false)}>Get in touch</Link>
             </Button>

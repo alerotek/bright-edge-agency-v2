@@ -85,6 +85,7 @@ export type AgentOnboardingState = {
   email: string;
   fullName: string;
   phone: string;
+  nationalIdNumber: string;
 
   // Step 2 — Email verified (handled by Supabase auth)
   emailVerified: boolean;
@@ -135,6 +136,7 @@ export const initialOnboardingState: AgentOnboardingState = {
   email: "",
   fullName: "",
   phone: "",
+  nationalIdNumber: "",
   emailVerified: false,
   emailVerifiedAt: null,
   phoneVerified: false,
