@@ -345,23 +345,27 @@ BEGIN
   END IF;
 END $$;
 
--- Ensure agent is verified before property assignment
-DO $$
+-- Trigger to ensure agent is verified before property assignment (replaces CHECK constraint with subquery)
+DROP FUNCTION IF EXISTS public.ensure_agent_verified() CASCADE;
+CREATE FUNCTION public.ensure_agent_verified()
+RETURNS TRIGGER AS $$
 BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint 
-    WHERE conname = 'properties_agent_verified_check'
-  ) THEN
-    ALTER TABLE public.properties ADD CONSTRAINT properties_agent_verified_check
-      CHECK (
-        agent_id IS NULL OR 
-        EXISTS (
-          SELECT 1 FROM public.agents 
-          WHERE id = agent_id AND verification_status = 'verified'
-        )
-      );
+  IF NEW.agent_id IS NOT NULL THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM public.agents 
+      WHERE id = NEW.agent_id AND verification_status = 'verified'
+    ) THEN
+      RAISE EXCEPTION 'Property can only be assigned to verified agents';
+    END IF;
   END IF;
-END $$;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_property_agent_verified ON public.properties;
+CREATE TRIGGER trg_property_agent_verified
+  BEFORE INSERT OR UPDATE OF agent_id ON public.properties
+  FOR EACH ROW EXECUTE FUNCTION public.ensure_agent_verified();
 
 -- Trigger to prevent orphan properties on agent deletion
 DROP FUNCTION IF EXISTS public.prevent_orphan_properties() CASCADE;
