@@ -189,23 +189,3 @@ function RouteComponent() {
     </div>
   );
 }
-</parameter>
-<task_progress>
-- [x] Step 1: Analyze existing codebase
-- [x] Step 2: Create combined single migration file
-- [x] Step 3: Create marketplace server functions
-- [x] Step 4: Create marketplace frontend components
-- [x] Step 5: Create owner profile page route
-- [x] Step 6: Fix migration conflicts with existing V2 schema
-- [x] Step 7: Fix migration CHECK constraint syntax
-- [x] Step 8: Fix agents/properties schema for backward compatibility
-- [x] Step 9: Fix seed.sql VALUES list mismatch by using UNION ALL inserts
-- [x] Step 10: Remove stray XML tag from seed.sql
-- [x] Step 11: Final verification
-- [x] Step 12: Regenerate Supabase types
-- [x] Step 13: Create public agent profile route
-- [ ] Step 14: Create public owners index route
-- [ ] Step 15: Add analytics tracking to property pages
-- [ ] Step 16: Update route tree registration
-</parameter>
-</write_to_file>
