@@ -15,7 +15,7 @@ const getOwners = createServerFn({ method: 'GET' })
     return { owners: owners ?? [] };
   });
 
-export const Route = createFileRoute('/owners/')({
+export const Route = createFileRoute('/owners')({
   component: RouteComponent,
   loader: async () => {
     const { owners } = await getOwners();
