@@ -208,3 +208,30 @@ export const socialVideosQuery = queryOptions({
   },
   staleTime: 30_000,
 });
+
+export const agentApplicationsQuery = queryOptions({
+  queryKey: ["admin", "agent-applications"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("agent_applications")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+  staleTime: 15_000,
+});
+
+export const pendingAgentApplicationsQuery = queryOptions({
+  queryKey: ["admin", "agent-applications", "pending"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("agent_applications")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+  staleTime: 10_000,
+});

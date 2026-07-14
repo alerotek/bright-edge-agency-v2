@@ -1,84 +1,211 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Mail, MessageCircle, Phone } from "lucide-react";
-import { agentBySlugQuery } from "@/lib/queries";
-import { Button } from "@/components/ui/button";
-import { PropertyCard } from "@/components/site/PropertyCard";
-import { buildWhatsappLink } from "@/lib/format";
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client.server';
+import { VerificationBadge } from '@/components/marketplace/VerificationBadge';
 
-export const Route = createFileRoute("/agents/$slug")({
-  loader: async ({ context, params }) => {
-    const data = await context.queryClient.ensureQueryData(agentBySlugQuery(params.slug));
-    if (!data) throw notFound();
-    return data;
+const getAgentBySlug = createServerFn({ method: 'GET' })
+  .validator((data: unknown) => z.object({ slug: z.string() }).parse(data))
+  .handler(async ({ data }) => {
+    const { data: agent, error } = await supabase
+      .from('agents')
+      .select(`
+        *,
+        agent_social_accounts (*),
+        agent_areas (*),
+        agent_documents (*)
+      `)
+      .eq('slug', data.slug)
+      .eq('active', true)
+      .maybeSingle();
+
+    if (error || !agent) return null;
+
+    const { data: listings } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('agent_id', agent.id)
+      .in('property_status', ['published', 'featured'])
+      .order('created_at', { ascending: false })
+      .limit(12);
+
+    const { data: reviews } = await supabase
+      .from('marketplace_reviews')
+      .select('*')
+      .eq('entity_type', 'agent')
+      .eq('entity_id', agent.id)
+      .eq('is_verified', true)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    return { ...agent, listings: listings ?? [], reviews: reviews ?? [] };
+  });
+
+export const Route = createFileRoute('/agents/$slug')({
+  component: RouteComponent,
+  loader: async ({ params }) => {
+    const agent = await getAgentBySlug({ data: { slug: params.slug } });
+    if (!agent) throw redirect({ to: '/agents' });
+    return { agent };
   },
-  head: ({ loaderData, params }) => {
-    const d: any = loaderData;
-    if (!d) return {};
-    const a = d.agent;
-    return {
-      meta: [
-        { title: `${a.full_name} | ${a.position} | Bright Edge Agency` },
-        { name: "description", content: a.bio?.slice(0, 160) ?? "" },
-        { property: "og:title", content: `${a.full_name} | Bright Edge Agency` },
-        { property: "og:description", content: a.bio?.slice(0, 160) ?? "" },
-        { property: "og:image", content: a.photo ?? "" },
-        { property: "og:type", content: "profile" },
-        { property: "og:url", content: `/agents/${params.slug}` },
-      ],
-      links: [{ rel: "canonical", href: `/agents/${params.slug}` }],
-      scripts: [{
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Person",
-          name: a.full_name,
-          jobTitle: a.position,
-          image: a.photo,
-          telephone: a.phone,
-          email: a.email,
-          worksFor: { "@type": "RealEstateAgent", name: "Bright Edge Agency" },
-        }),
-      }],
-    };
-  },
-  component: AgentDetail,
 });
 
-function AgentDetail() {
-  const { agent: a, properties }: any = Route.useLoaderData();
+function RouteComponent() {
+  const { agent } = Route.useLoaderData();
+
   return (
-    <>
-      <section className="border-b border-border bg-muted/30">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[260px_1fr] lg:px-8">
-          {a.photo ? <img src={a.photo} alt={a.full_name} className="aspect-[4/5] w-full rounded-2xl object-cover" /> : null}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{a.position}</p>
-            <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight sm:text-5xl">{a.full_name}</h1>
-            <p className="mt-4 max-w-2xl text-base text-muted-foreground">{a.bio}</p>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {a.whatsapp && (
-                <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
-                  <a href={buildWhatsappLink(a.whatsapp, `Hi ${a.full_name.split(" ")[0]}, I'd like to discuss a property.`)} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
-                  </a>
-                </Button>
-              )}
-              {a.phone && <Button asChild variant="outline"><a href={`tel:${a.phone.replace(/\s/g,"")}`}><Phone className="mr-2 h-4 w-4" />{a.phone}</a></Button>}
-              {a.email && <Button asChild variant="outline"><a href={`mailto:${a.email}`}><Mail className="mr-2 h-4 w-4" />{a.email}</a></Button>}
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex items-start gap-6">
+            <img
+              src={agent.photo || '/placeholder-agent.jpg'}
+              alt={agent.full_name}
+              className="w-24 h-24 rounded-full object-cover"
+            />
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-gray-900">{agent.full_name}</h1>
+                <VerificationBadge level={agent.verification_level} />
+              </div>
+              <p className="text-lg text-gray-600 mt-1">{agent.position}</p>
+              <p className="text-gray-500 mt-1">{agent.agency_name}</p>
+              <div className="flex items-center gap-6 mt-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{agent.overall_rating?.toFixed(1) || '0.0'}</div>
+                  <div className="text-sm text-gray-500">Rating</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{agent.total_reviews || 0}</div>
+                  <div className="text-sm text-gray-500">Reviews</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{agent.deals_closed || 0}</div>
+                  <div className="text-sm text-gray-500">Deals Closed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{agent.response_rate?.toFixed(0) || '0'}%</div>
+                  <div className="text-sm text-gray-500">Response Rate</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <h2 className="font-display text-2xl font-semibold">Current listings ({properties.length})</h2>
-        {properties.length === 0 ? (
-          <p className="mt-4 text-muted-foreground">No active listings, get in touch to discuss upcoming inventory.</p>
-        ) : (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {properties.map((p: any) => <PropertyCard key={p.id} property={p} />)}
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+            <section className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold mb-4">About</h2>
+              <p className="text-gray-700 whitespace-pre-line">{agent.bio}</p>
+              {agent.specializations && agent.specializations.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-2">Specializations</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {agent.specializations.map((spec: string) => (
+                      <span key={spec} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </section>
+
+            {agent.listings && agent.listings.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-bold mb-4">Listings</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {agent.listings.map((listing: any) => (
+                    <a
+                      key={listing.id}
+                      href={`/properties/${listing.slug}`}
+                      className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition"
+                    >
+                      <div className="aspect-video bg-gray-200 relative">
+                        {listing.images && listing.images[0] && (
+                          <img
+                            src={listing.images[0].image_url}
+                            alt={listing.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg">{listing.title}</h3>
+                        <p className="text-gray-600">{listing.address}</p>
+                        <p className="text-blue-600 font-bold mt-2">
+                          KES {listing.price.toLocaleString()}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
-        )}
-      </section>
-    </>
+
+          <div className="space-y-6">
+            <section className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
+              <div className="space-y-3">
+                <a href={`tel:${agent.phone}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600">
+                  <span>📞</span>
+                  <span>{agent.phone}</span>
+                </a>
+                <a href={`https://wa.me/${agent.whatsapp?.replace(/[^0-9]/g, '')}`} className="flex items-center gap-3 text-gray-700 hover:text-green-600">
+                  <span>💬</span>
+                  <span>WhatsApp</span>
+                </a>
+                <a href={`mailto:${agent.email}`} className="flex items-center gap-3 text-gray-700 hover:text-blue-600">
+                  <span>✉️</span>
+                  <span>{agent.email}</span>
+                </a>
+              </div>
+            </section>
+
+            {agent.agent_social_accounts && agent.agent_social_accounts.length > 0 && (
+              <section className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Social Media</h3>
+                <div className="space-y-2">
+                  {agent.agent_social_accounts.map((account: any) => (
+                    <a
+                      key={account.id}
+                      href={account.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-gray-700 hover:text-blue-600"
+                    >
+                      <span className="capitalize">{account.platform}</span>
+                    </a>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
+</parameter>
+<task_progress>
+- [x] Step 1: Analyze existing codebase
+- [x] Step 2: Create combined single migration file
+- [x] Step 3: Create marketplace server functions
+- [x] Step 4: Create marketplace frontend components
+- [x] Step 5: Create owner profile page route
+- [x] Step 6: Fix migration conflicts with existing V2 schema
+- [x] Step 7: Fix migration CHECK constraint syntax
+- [x] Step 8: Fix agents/properties schema for backward compatibility
+- [x] Step 9: Fix seed.sql VALUES list mismatch by using UNION ALL inserts
+- [x] Step 10: Remove stray XML tag from seed.sql
+- [x] Step 11: Final verification
+- [x] Step 12: Regenerate Supabase types
+- [x] Step 13: Create public agent profile route
+- [ ] Step 14: Create public owners index route
+- [ ] Step 15: Add analytics tracking to property pages
+- [ ] Step 16: Update route tree registration
+</parameter>
+</write_to_file>

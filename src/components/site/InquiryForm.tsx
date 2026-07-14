@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { supabase } from "@/integrations/supabase/client";
+import { submitInquiry } from "@/lib/server-functions/inquiry";
 
 const schema = z.object({
   full_name: z.string().trim().min(2, "Please enter your name").max(100),
@@ -34,19 +34,20 @@ export function InquiryForm({
   });
 
   const onSubmit = async (v: FormValues) => {
-    const { error } = await supabase.from("inquiries").insert({
-      property_id: propertyId ?? null,
-      agent_id: agentId ?? null,
-      full_name: v.full_name,
-      email: v.email,
-      phone: v.phone || null,
-      message: v.message,
-      source: source as any,
+    const result = await submitInquiry({
+      data: {
+        property_id: propertyId ?? null,
+        agent_id: agentId ?? null,
+        full_name: v.full_name,
+        email: v.email,
+        phone: v.phone || null,
+        message: v.message,
+        source: source as any,
+      },
     });
-    if (error) {
-      console.error("[InquiryForm] insert error:", error);
+    if (!result.success) {
       toast.error("We couldn't send your message", {
-        description: "Please try again or contact us directly.",
+        description: result.error || "Please try again or contact us directly.",
       });
       return;
     }
